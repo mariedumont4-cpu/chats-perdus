@@ -1,105 +1,169 @@
 "use client";
 
 import { useState } from "react";
-import dynamic from "next/dynamic";
 import { supabase } from "@/lib/supabase";
-
-const MapPicker = dynamic(
-  () => import("@/components/MapPicker"),
-  {
-    ssr: false,
-  }
-);
+import Link from "next/link";
 
 export default function SignalerChatPerdu() {
-  const [message, setMessage] = useState("");
-  const [isError, setIsError] = useState(false);
-
-  const [latitude, setLatitude] = useState<number | null>(null);
-  const [longitude, setLongitude] = useState<number | null>(null);
-
-  const [evacuationIncendie, setEvacuationIncendie] =
-    useState(false);
-
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
-    setMessage("");
-    setIsError(false);
     setLoading(true);
+    setMessage("");
 
     const form = event.currentTarget;
     const formData = new FormData(form);
+
+    const name = String(formData.get("name") || "");
+    const color = String(formData.get("color") || "");
+    const breed = String(formData.get("breed") || "");
+    const sex = String(formData.get("sex") || "");
+    const contactEmail = String(
+      formData.get("contact_email") || ""
+    );
+    const lostDate = String(
+      formData.get("lost_date") || ""
+    );
+    const location = String(
+      formData.get("location") || ""
+    );
+    const description = String(
+      formData.get("description") || ""
+    );
+
+    const latitudeValue = String(
+      formData.get("latitude") || ""
+    );
+
+    const longitudeValue = String(
+      formData.get("longitude") || ""
+    );
+
+    const evacuationIncendie =
+      formData.get("evacuation_incendie") === "true";
+
+    // =========================
+    // VÉRIFICATIONS
+    // =========================
+
+    if (!lostDate) {
+      setMessage(
+        "Merci d'indiquer la date de disparition."
+      );
+      setLoading(false);
+      return;
+    }
+
+    if (!contactEmail) {
+      setMessage(
+        "Merci d'indiquer votre adresse e-mail."
+      );
+      setLoading(false);
+      return;
+    }
+
+    // =========================
+    // PHOTO
+    // =========================
 
     const photo = formData.get("photo") as File | null;
 
     let photoUrl: string | null = null;
 
-    // =========================
-    // ENVOI DE LA PHOTO
-    // =========================
-
     if (photo && photo.size > 0) {
-      const fileName = `${Date.now()}-${photo.name}`;
+      const fileExtension =
+        photo.name.split(".").pop() || "jpg";
 
-      const { error: uploadError } = await supabase.storage
-        .from("photos-chats")
-        .upload(fileName, photo);
+      const fileName = `${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2)}.${fileExtension}`;
+
+      const { error: uploadError } =
+        await supabase.storage
+          .from("photos-chats")
+          .upload(fileName, photo);
 
       if (uploadError) {
-        console.error("Erreur photo :", uploadError);
+        console.error(
+          "Erreur upload photo :",
+          uploadError
+        );
 
-        setIsError(true);
         setMessage(
-          "Impossible d'envoyer la photo. Veuillez réessayer."
+          "Impossible d'envoyer la photo."
         );
 
         setLoading(false);
         return;
       }
 
-      const { data: publicUrlData } = supabase.storage
-        .from("photos-chats")
-        .getPublicUrl(fileName);
+      const { data: publicUrlData } =
+        supabase.storage
+          .from("photos-chats")
+          .getPublicUrl(fileName);
 
       photoUrl = publicUrlData.publicUrl;
     }
 
     // =========================
-    // ENREGISTREMENT SUPABASE
+    // COORDONNÉES
+    // =========================
+
+    const latitude = latitudeValue
+      ? Number(latitudeValue)
+      : null;
+
+    const longitude = longitudeValue
+      ? Number(longitudeValue)
+      : null;
+
+    // =========================
+    // ENREGISTREMENT
     // =========================
 
     const { error } = await supabase
       .from("chats")
       .insert({
-        name: formData.get("name"),
-        color: formData.get("color"),
-        breed: formData.get("breed"),
-        sex: formData.get("sex"),
-        description: formData.get("description"),
-        lost_date: formData.get("lostDate"),
-        location: formData.get("location"),
+        name,
+        color,
+        breed: breed || null,
+        sex: sex || null,
+
+        // Adresse e-mail du propriétaire
+        contact_email: contactEmail,
+
+        lost_date: lostDate,
+        location,
+        description: description || null,
+
         latitude,
         longitude,
+
         photo_url: photoUrl,
 
-        // Statut du signalement
         statut: "perdu",
 
-        // Évacuation incendie
-        evacuation_incendie: evacuationIncendie,
+        evacuation_incendie:
+          evacuationIncendie,
       });
 
-    if (error) {
-      console.error("Erreur Supabase :", error);
+    // =========================
+    // ERREUR
+    // =========================
 
-      setIsError(true);
+    if (error) {
+      console.error(
+        "Erreur Supabase :",
+        error
+      );
+
       setMessage(
-        `Erreur : ${error.message}`
+        "Erreur : le signalement n'a pas pu être enregistré."
       );
 
       setLoading(false);
@@ -110,32 +174,32 @@ export default function SignalerChatPerdu() {
     // SUCCÈS
     // =========================
 
-    setIsError(false);
-
     setMessage(
       "🐱 Votre signalement a bien été enregistré !"
     );
 
     form.reset();
-
-    setLatitude(null);
-    setLongitude(null);
-    setEvacuationIncendie(false);
-
     setLoading(false);
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 py-16">
+    <main className="min-h-screen bg-emerald-50 px-6 py-16">
       <div className="mx-auto max-w-2xl">
 
-        {/* =========================
-            EN-TÊTE
-        ========================= */}
+        {/* RETOUR */}
 
-        <div className="mb-10">
+        <Link
+          href="/"
+          className="text-sm font-medium text-emerald-700 hover:text-emerald-900"
+        >
+          ← Retour à l'accueil
+        </Link>
 
-          <p className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+        {/* TITRE */}
+
+        <div className="mt-8 mb-10">
+
+          <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
             Nouveau signalement
           </p>
 
@@ -144,15 +208,13 @@ export default function SignalerChatPerdu() {
           </h1>
 
           <p className="mt-4 text-gray-600">
-            Donnez-nous le plus d'informations possible
-            pour aider les personnes à reconnaître votre chat.
+            Aidez-nous à retrouver votre compagnon
+            en partageant quelques informations.
           </p>
 
         </div>
 
-        {/* =========================
-            FORMULAIRE
-        ========================= */}
+        {/* FORMULAIRE */}
 
         <form
           onSubmit={handleSubmit}
@@ -175,7 +237,7 @@ export default function SignalerChatPerdu() {
               type="text"
               required
               placeholder="Ex : Minou"
-              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-black"
+              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
             />
           </div>
 
@@ -194,8 +256,8 @@ export default function SignalerChatPerdu() {
               name="color"
               type="text"
               required
-              placeholder="Ex : gris tigré et blanc"
-              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-black"
+              placeholder="Ex : noir et blanc"
+              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
             />
           </div>
 
@@ -214,7 +276,7 @@ export default function SignalerChatPerdu() {
               name="breed"
               type="text"
               placeholder="Ex : Européen"
-              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-black"
+              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
             />
           </div>
 
@@ -231,7 +293,7 @@ export default function SignalerChatPerdu() {
             <select
               id="sex"
               name="sex"
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3"
+              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 outline-none focus:border-emerald-500"
             >
               <option value="">
                 Sélectionner
@@ -251,41 +313,48 @@ export default function SignalerChatPerdu() {
             </select>
           </div>
 
-          {/* DESCRIPTION */}
+          {/* EMAIL */}
 
           <div>
             <label
-              htmlFor="description"
+              htmlFor="contact_email"
               className="font-medium text-gray-900"
             >
-              Description
+              Votre adresse e-mail
             </label>
 
-            <textarea
-              id="description"
-              name="description"
-              rows={5}
-              placeholder="Collier, tatouage, particularités physiques, comportement..."
-              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-black"
+            <input
+              id="contact_email"
+              name="contact_email"
+              type="email"
+              required
+              placeholder="vous@exemple.fr"
+              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
             />
+
+            <p className="mt-2 text-sm text-gray-500">
+              Cette adresse restera privée et permettra
+              aux personnes ayant une information sur votre
+              chat de vous contacter.
+            </p>
           </div>
 
           {/* DATE */}
 
           <div>
             <label
-              htmlFor="lostDate"
+              htmlFor="lost_date"
               className="font-medium text-gray-900"
             >
               Date de disparition
             </label>
 
             <input
-              id="lostDate"
-              name="lostDate"
+              id="lost_date"
+              name="lost_date"
               type="date"
               required
-              className="mt-2 w-full rounded-lg border border-gray-300 p-3"
+              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
             />
           </div>
 
@@ -305,87 +374,104 @@ export default function SignalerChatPerdu() {
               type="text"
               required
               placeholder="Ex : Bordeaux, quartier Saint-Michel"
-              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-black"
+              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
             />
           </div>
 
-          {/* =========================
-              CARTE
-          ========================= */}
+          {/* DESCRIPTION */}
 
           <div>
-
-            <label className="font-medium text-gray-900">
-              📍 Où votre chat a-t-il disparu ?
+            <label
+              htmlFor="description"
+              className="font-medium text-gray-900"
+            >
+              Description
             </label>
 
-            <p className="mt-2 mb-4 text-sm text-gray-500">
-              Cliquez directement sur la carte pour indiquer
-              le lieu de disparition.
-            </p>
-
-            <MapPicker
-              latitude={latitude}
-              longitude={longitude}
-              onChange={(lat, lng) => {
-                setLatitude(lat);
-                setLongitude(lng);
-              }}
+            <textarea
+              id="description"
+              name="description"
+              rows={5}
+              placeholder="Collier, tatouage, particularités physiques, comportement..."
+              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
             />
+          </div>
 
-            {latitude !== null &&
-              longitude !== null && (
-                <p className="mt-3 text-sm text-gray-500">
-                  Position sélectionnée :{" "}
-                  {latitude.toFixed(5)},{" "}
-                  {longitude.toFixed(5)}
-                </p>
-              )}
+          {/* COORDONNÉES */}
+
+          <div className="grid gap-4 sm:grid-cols-2">
+
+            <div>
+              <label
+                htmlFor="latitude"
+                className="font-medium text-gray-900"
+              >
+                Latitude
+              </label>
+
+              <input
+                id="latitude"
+                name="latitude"
+                type="number"
+                step="any"
+                placeholder="Ex : 44.8378"
+                className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="longitude"
+                className="font-medium text-gray-900"
+              >
+                Longitude
+              </label>
+
+              <input
+                id="longitude"
+                name="longitude"
+                type="number"
+                step="any"
+                placeholder="Ex : -0.5792"
+                className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500"
+              />
+            </div>
 
           </div>
 
-          {/* =========================
-              ÉVACUATION INCENDIE
-          ========================= */}
+          {/* INCENDIES */}
 
-          <div className="rounded-xl border border-orange-200 bg-orange-50 p-5">
+          <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-5">
 
             <label className="flex cursor-pointer items-start gap-3">
 
               <input
                 type="checkbox"
-                checked={evacuationIncendie}
-                onChange={(event) =>
-                  setEvacuationIncendie(
-                    event.target.checked
-                  )
-                }
-                className="mt-1 h-5 w-5 rounded border-gray-300"
+                name="evacuation_incendie"
+                value="true"
+                className="mt-1 h-5 w-5 rounded border-gray-300 text-emerald-700"
               />
 
-              <div>
+              <span>
 
-                <p className="font-semibold text-gray-900">
-                  🔥 Chat perdu lors d'une évacuation incendie
-                </p>
+                <span className="block font-semibold text-gray-900">
+                  🔥 Ce chat a été perdu suite à une évacuation liée aux incendies
+                </span>
 
-                <p className="mt-1 text-sm leading-6 text-gray-600">
-                  Cochez cette case si votre chat a été perdu
-                  pendant une évacuation liée aux incendies.
-                </p>
+                <span className="mt-1 block text-sm text-gray-600">
+                  Cochez cette case si votre chat a disparu
+                  pendant ou après une évacuation.
+                </span>
 
-              </div>
+              </span>
 
             </label>
 
           </div>
 
-          {/* =========================
-              PHOTO
-          ========================= */}
+          {/* PHOTO */}
 
           <div>
-
             <label
               htmlFor="photo"
               className="font-medium text-gray-900"
@@ -404,40 +490,30 @@ export default function SignalerChatPerdu() {
             <p className="mt-2 text-sm text-gray-500">
               Une photo peut aider à reconnaître votre chat.
             </p>
-
           </div>
 
-          {/* =========================
-              BOUTON
-          ========================= */}
+          {/* BOUTON */}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-black px-6 py-4 font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-xl bg-emerald-700 px-6 py-4 font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading
-              ? "Enregistrement..."
-              : "Publier le signalement"}
+              ? "Publication en cours..."
+              : "🐱 Publier le signalement"}
           </button>
 
-          {/* =========================
-              MESSAGE
-          ========================= */}
+          {/* MESSAGE */}
 
           {message && (
-            <div
-              className={`rounded-xl p-4 ${
-                isError
-                  ? "bg-red-50 text-red-800"
-                  : "bg-green-50 text-green-800"
-              }`}
-            >
+            <div className="rounded-xl bg-emerald-50 p-4 text-sm font-medium text-emerald-800">
               {message}
             </div>
           )}
 
         </form>
+
       </div>
     </main>
   );
