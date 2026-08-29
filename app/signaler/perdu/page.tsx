@@ -133,23 +133,15 @@ export default function SignalerChatPerdu() {
         color,
         breed: breed || null,
         sex: sex || null,
-
-        // Adresse e-mail du propriétaire
         contact_email: contactEmail,
-
         lost_date: lostDate,
         location,
         description: description || null,
-
         latitude,
         longitude,
-
         photo_url: photoUrl,
-
         statut: "perdu",
-
-        evacuation_incendie:
-          evacuationIncendie,
+        evacuation_incendie: evacuationIncendie,
       });
 
     // =========================
@@ -186,8 +178,6 @@ export default function SignalerChatPerdu() {
     <main className="min-h-screen bg-emerald-50 px-6 py-16">
       <div className="mx-auto max-w-2xl">
 
-        {/* RETOUR */}
-
         <Link
           href="/"
           className="text-sm font-medium text-emerald-700 hover:text-emerald-900"
@@ -195,26 +185,20 @@ export default function SignalerChatPerdu() {
           ← Retour à l'accueil
         </Link>
 
-        {/* TITRE */}
-
-        <div className="mt-8 mb-10">
-
+        <div className="mb-10 mt-8">
           <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
             Nouveau signalement
           </p>
 
-          <h1 className="mt-2 text-4xl font-bold text-gray-900">
+          <h1 className="mt-2 text-4xl font-bold text-black">
             🐱 Signaler un chat perdu
           </h1>
 
-          <p className="mt-4 text-gray-600">
+          <p className="mt-4 text-gray-700">
             Aidez-nous à retrouver votre compagnon
             en partageant quelques informations.
           </p>
-
         </div>
-
-        {/* FORMULAIRE */}
 
         <form
           onSubmit={handleSubmit}
@@ -226,7 +210,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="name"
-              className="font-medium text-gray-900"
+              className="font-medium text-black"
             >
               Nom du chat
             </label>
@@ -237,7 +221,7 @@ export default function SignalerChatPerdu() {
               type="text"
               required
               placeholder="Ex : Minou"
-              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
             />
           </div>
 
@@ -246,7 +230,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="color"
-              className="font-medium text-gray-900"
+              className="font-medium text-black"
             >
               Couleur / robe
             </label>
@@ -257,7 +241,7 @@ export default function SignalerChatPerdu() {
               type="text"
               required
               placeholder="Ex : noir et blanc"
-              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
             />
           </div>
 
@@ -266,7 +250,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="breed"
-              className="font-medium text-gray-900"
+              className="font-medium text-black"
             >
               Race
             </label>
@@ -276,7 +260,7 @@ export default function SignalerChatPerdu() {
               name="breed"
               type="text"
               placeholder="Ex : Européen"
-              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
             />
           </div>
 
@@ -285,7 +269,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="sex"
-              className="font-medium text-gray-900"
+              className="font-medium text-black"
             >
               Sexe
             </label>
@@ -293,23 +277,12 @@ export default function SignalerChatPerdu() {
             <select
               id="sex"
               name="sex"
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 outline-none focus:border-emerald-500"
+              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
             >
-              <option value="">
-                Sélectionner
-              </option>
-
-              <option value="male">
-                Mâle
-              </option>
-
-              <option value="female">
-                Femelle
-              </option>
-
-              <option value="unknown">
-                Je ne sais pas
-              </option>
+              <option value="">Sélectionner</option>
+              <option value="male">Mâle</option>
+              <option value="female">Femelle</option>
+              <option value="unknown">Je ne sais pas</option>
             </select>
           </div>
 
@@ -318,7 +291,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="contact_email"
-              className="font-medium text-gray-900"
+              className="font-medium text-black"
             >
               Votre adresse e-mail
             </label>
@@ -329,10 +302,10 @@ export default function SignalerChatPerdu() {
               type="email"
               required
               placeholder="vous@exemple.fr"
-              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
             />
 
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-sm text-gray-600">
               Cette adresse restera privée et permettra
               aux personnes ayant une information sur votre
               chat de vous contacter.
@@ -344,7 +317,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="lost_date"
-              className="font-medium text-gray-900"
+              className="font-medium text-black"
             >
               Date de disparition
             </label>
@@ -354,7 +327,7 @@ export default function SignalerChatPerdu() {
               name="lost_date"
               type="date"
               required
-              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
             />
           </div>
 
@@ -363,7 +336,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="location"
-              className="font-medium text-gray-900"
+              className="font-medium text-black"
             >
               Lieu de disparition
             </label>
@@ -374,7 +347,7 @@ export default function SignalerChatPerdu() {
               type="text"
               required
               placeholder="Ex : Bordeaux, quartier Saint-Michel"
-              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
             />
           </div>
 
@@ -383,7 +356,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="description"
-              className="font-medium text-gray-900"
+              className="font-medium text-black"
             >
               Description
             </label>
@@ -393,7 +366,7 @@ export default function SignalerChatPerdu() {
               name="description"
               rows={5}
               placeholder="Collier, tatouage, particularités physiques, comportement..."
-              className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
             />
           </div>
 
@@ -404,7 +377,7 @@ export default function SignalerChatPerdu() {
             <div>
               <label
                 htmlFor="latitude"
-                className="font-medium text-gray-900"
+                className="font-medium text-black"
               >
                 Latitude
               </label>
@@ -415,14 +388,14 @@ export default function SignalerChatPerdu() {
                 type="number"
                 step="any"
                 placeholder="Ex : 44.8378"
-                className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
               />
             </div>
 
             <div>
               <label
                 htmlFor="longitude"
-                className="font-medium text-gray-900"
+                className="font-medium text-black"
               >
                 Longitude
               </label>
@@ -433,7 +406,7 @@ export default function SignalerChatPerdu() {
                 type="number"
                 step="any"
                 placeholder="Ex : -0.5792"
-                className="mt-2 w-full rounded-lg border border-gray-300 p-3 outline-none focus:border-emerald-500"
+                className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
               />
             </div>
 
@@ -453,20 +426,17 @@ export default function SignalerChatPerdu() {
               />
 
               <span>
-
-                <span className="block font-semibold text-gray-900">
+                <span className="block font-semibold text-black">
                   🔥 Ce chat a été perdu suite à une évacuation liée aux incendies
                 </span>
 
-                <span className="mt-1 block text-sm text-gray-600">
+                <span className="mt-1 block text-sm text-gray-700">
                   Cochez cette case si votre chat a disparu
                   pendant ou après une évacuation.
                 </span>
-
               </span>
 
             </label>
-
           </div>
 
           {/* PHOTO */}
@@ -474,7 +444,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="photo"
-              className="font-medium text-gray-900"
+              className="font-medium text-black"
             >
               Photo du chat
             </label>
@@ -484,10 +454,10 @@ export default function SignalerChatPerdu() {
               name="photo"
               type="file"
               accept="image/*"
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3"
+              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black"
             />
 
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-sm text-gray-600">
               Une photo peut aider à reconnaître votre chat.
             </p>
           </div>
@@ -513,7 +483,6 @@ export default function SignalerChatPerdu() {
           )}
 
         </form>
-
       </div>
     </main>
   );
