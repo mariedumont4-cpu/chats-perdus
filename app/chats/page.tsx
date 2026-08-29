@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
+export const dynamic = "force-dynamic";
+
 export default async function ChatsPage() {
   const { data: chats, error } = await supabase
   .from("chats")
