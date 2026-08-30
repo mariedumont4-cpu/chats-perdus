@@ -21,29 +21,29 @@ export default async function HomePage() {
           HERO
       ===================================================== */}
 
-      <section className="px-6 py-12 sm:py-16">
+      <section className="px-6 py-16">
         <div className="mx-auto max-w-6xl">
 
-          <div className="overflow-hidden rounded-3xl bg-white shadow-sm">
+          <div className="rounded-3xl bg-white p-8 shadow-sm sm:p-12 lg:p-16">
 
-            <div className="grid items-center lg:grid-cols-2">
+            <div className="grid items-center gap-12 lg:grid-cols-2">
 
               {/* TEXTE */}
 
-              <div className="p-8 sm:p-12 lg:p-16">
+              <div>
 
                 <div className="inline-flex rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-800">
                   🐾 Une communauté qui aide les chats
                 </div>
 
-                <h1 className="mt-6 text-4xl font-bold tracking-tight text-emerald-950 sm:text-5xl lg:text-6xl">
+                <h1 className="mt-6 text-4xl font-bold text-emerald-950 sm:text-5xl">
                   Aidons les chats perdus à
-                  <span className="mt-2 block text-emerald-600">
+                  <span className="block text-emerald-600">
                     retrouver leur maison.
                   </span>
                 </h1>
 
-                <p className="mt-6 max-w-xl text-lg leading-8 text-gray-600">
+                <p className="mt-6 text-lg leading-8 text-gray-600">
                   Signalez un chat perdu ou trouvé et partagez sa
                   localisation pour aider les propriétaires à retrouver
                   leur compagnon.
@@ -71,23 +71,21 @@ export default async function HomePage() {
 
               {/* ILLUSTRATION */}
 
-              <div className="flex min-h-[360px] items-center justify-center bg-emerald-100 p-10">
+              <div className="flex justify-center">
 
-                <div className="text-center">
+                <div className="flex h-72 w-72 items-center justify-center rounded-full bg-emerald-100">
 
-                  <div className="mx-auto flex h-56 w-56 items-center justify-center rounded-full bg-white shadow-sm">
-                    <span className="text-8xl">
+                  <div className="text-center">
+
+                    <div className="text-8xl">
                       🐱
-                    </span>
+                    </div>
+
+                    <p className="mt-4 font-semibold text-emerald-800">
+                      Chaque signalement compte
+                    </p>
+
                   </div>
-
-                  <p className="mt-6 text-lg font-bold text-emerald-900">
-                    Chaque signalement compte
-                  </p>
-
-                  <p className="mt-2 text-sm text-emerald-800">
-                    Ensemble, aidons-les à rentrer chez eux.
-                  </p>
 
                 </div>
 
@@ -106,6 +104,7 @@ export default async function HomePage() {
       ===================================================== */}
 
       <section className="px-6 pb-16">
+
         <div className="mx-auto max-w-6xl">
 
           <div className="mb-8 text-center">
@@ -120,13 +119,14 @@ export default async function HomePage() {
 
           </div>
 
+
           <div className="grid gap-6 md:grid-cols-3">
 
             {/* CHATS PERDUS */}
 
             <Link
               href="/chats"
-              className="group rounded-2xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              className="rounded-2xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
 
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-3xl">
@@ -141,7 +141,7 @@ export default async function HomePage() {
                 Consultez les chats actuellement recherchés.
               </p>
 
-              <p className="mt-5 font-semibold text-emerald-600 transition group-hover:text-emerald-700">
+              <p className="mt-5 font-semibold text-emerald-600">
                 Voir les chats perdus →
               </p>
 
@@ -152,7 +152,7 @@ export default async function HomePage() {
 
             <Link
               href="/chats-trouves"
-              className="group rounded-2xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              className="rounded-2xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
 
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-3xl">
@@ -167,7 +167,7 @@ export default async function HomePage() {
                 Consultez les chats trouvés et aidez leur propriétaire.
               </p>
 
-              <p className="mt-5 font-semibold text-emerald-600 transition group-hover:text-emerald-700">
+              <p className="mt-5 font-semibold text-emerald-600">
                 Voir les chats trouvés →
               </p>
 
@@ -178,7 +178,7 @@ export default async function HomePage() {
 
             <Link
               href="/carte"
-              className="group rounded-2xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              className="rounded-2xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
 
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-50 text-3xl">
@@ -193,7 +193,7 @@ export default async function HomePage() {
                 Visualisez les signalements autour de vous.
               </p>
 
-              <p className="mt-5 font-semibold text-emerald-600 transition group-hover:text-emerald-700">
+              <p className="mt-5 font-semibold text-emerald-600">
                 Voir la carte →
               </p>
 
@@ -202,59 +202,46 @@ export default async function HomePage() {
           </div>
 
         </div>
+
       </section>
 
 
       {/* =====================================================
-          ALERTE INCENDIES
+          INCENDIES
       ===================================================== */}
 
       <section className="px-6 pb-16">
 
         <div className="mx-auto max-w-6xl">
 
-          <div className="overflow-hidden rounded-3xl border border-orange-300 bg-gradient-to-r from-orange-100 to-red-50 shadow-sm">
+          <div className="rounded-2xl border border-orange-200 bg-orange-50 p-8">
 
-            <div className="p-8 sm:p-10">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
 
-              <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-3xl">
+                🔥
+              </div>
 
-                {/* ICÔNE */}
+              <div className="flex-1">
 
-                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl bg-orange-200 text-4xl shadow-sm">
-                  🔥
-                </div>
+                <h2 className="text-2xl font-bold text-orange-950">
+                  Chats perdus lors d'une évacuation
+                </h2>
 
-                {/* TEXTE */}
-
-                <div className="flex-1">
-
-                  <div className="inline-flex rounded-full bg-orange-200 px-3 py-1 text-xs font-bold uppercase tracking-wide text-orange-900">
-                    Situation particulière
-                  </div>
-
-                  <h2 className="mt-3 text-2xl font-bold text-orange-950 sm:text-3xl">
-                    Chats perdus lors d'une évacuation
-                  </h2>
-
-                  <p className="mt-3 max-w-3xl leading-7 text-orange-900">
-                    Les évacuations liées aux incendies peuvent entraîner
-                    la disparition de nombreux animaux. Signalez rapidement
-                    votre chat afin de faciliter les recherches.
-                  </p>
-
-                </div>
-
-                {/* BOUTON */}
-
-                <Link
-                  href="/signaler/perdu"
-                  className="shrink-0 rounded-xl bg-orange-600 px-6 py-4 text-center font-bold text-white shadow-sm transition hover:bg-orange-700"
-                >
-                  🔥 Signaler un chat
-                </Link>
+                <p className="mt-2 text-orange-900/70">
+                  Les évacuations peuvent entraîner la disparition
+                  de nombreux animaux. Signalez rapidement votre chat
+                  pour aider les recherches.
+                </p>
 
               </div>
+
+              <Link
+                href="/signaler/perdu"
+                className="rounded-xl bg-orange-600 px-5 py-3 text-center font-semibold text-white transition hover:bg-orange-700"
+              >
+                🔥 Signaler
+              </Link>
 
             </div>
 
@@ -289,7 +276,7 @@ export default async function HomePage() {
 
             <Link
               href="/chats"
-              className="font-semibold text-emerald-700 hover:text-emerald-900"
+              className="font-semibold text-emerald-700"
             >
               Voir tous les chats →
             </Link>
@@ -301,13 +288,13 @@ export default async function HomePage() {
 
           {recentChats.length === 0 ? (
 
-            <div className="mt-8 rounded-2xl bg-white p-10 text-center shadow-sm">
+            <div className="mt-8 rounded-2xl bg-white p-8 text-center shadow-sm">
 
-              <div className="text-6xl">
+              <div className="text-5xl">
                 🐱
               </div>
 
-              <p className="mt-5 font-semibold text-gray-900">
+              <p className="mt-4 font-medium text-gray-900">
                 Aucun signalement pour le moment.
               </p>
 
@@ -319,195 +306,105 @@ export default async function HomePage() {
 
           ) : (
 
-            /* CARTES */
+            /* LISTE */
 
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
-              {recentChats.map((chat) => {
+              {recentChats.map((chat) => (
 
-                const isEvacuation =
-                  chat.statut === "perdu" &&
-                  chat.evacuation_incendie === true;
+                <Link
+                  key={chat.id}
+                  href={`/chats/${chat.id}`}
+                  className={`overflow-hidden rounded-2xl shadow-sm transition hover:-translate-y-1 hover:shadow-md ${
+                    chat.evacuation_incendie
+                      ? "border-2 border-orange-300 bg-orange-50"
+                      : "bg-white"
+                  }`}
+                >
 
-                return (
+                  {/* PHOTO */}
 
-                  <Link
-                    key={chat.id}
-                    href={`/chats/${chat.id}`}
-                    className={`
-                      group overflow-hidden rounded-2xl shadow-sm transition
-                      hover:-translate-y-1 hover:shadow-lg
-                      ${
-                        isEvacuation
-                          ? "border-2 border-orange-400 bg-orange-50"
-                          : "bg-white"
-                      }
-                    `}
-                  >
+                  {chat.photo_url ? (
 
-                    {/* PHOTO */}
+                    <img
+                      src={chat.photo_url}
+                      alt={`Photo de ${chat.name || "chat"}`}
+                      className="h-52 w-full object-cover"
+                    />
 
-                    <div className="relative">
+                  ) : (
 
-                      {chat.photo_url ? (
+                    <div
+                      className={`flex h-52 w-full items-center justify-center text-7xl ${
+                        chat.evacuation_incendie
+                          ? "bg-orange-100"
+                          : "bg-emerald-50"
+                      }`}
+                    >
+                      🐱
+                    </div>
 
-                        <img
-                          src={chat.photo_url}
-                          alt={`Photo de ${chat.name || "chat"}`}
-                          className="h-52 w-full object-cover"
-                        />
+                  )}
 
-                      ) : (
 
-                        <div
-                          className={`
-                            flex h-52 w-full items-center justify-center text-7xl
-                            ${
-                              isEvacuation
-                                ? "bg-orange-100"
-                                : "bg-emerald-50"
-                            }
-                          `}
-                        >
-                          🐱
-                        </div>
+                  <div className="p-6">
 
+                    {/* BADGES */}
+
+                    <div className="flex flex-wrap gap-2">
+
+                      {chat.statut === "perdu" && (
+                        <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800">
+                          🔴 Perdu
+                        </span>
                       )}
 
-                      {/* BADGE INCENDIE */}
+                      {chat.statut === "trouve" && (
+                        <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                          🟢 Trouvé
+                        </span>
+                      )}
 
-                      {isEvacuation && (
+                      {chat.statut === "retrouve" && (
+                        <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
+                          ✅ Retrouvé
+                        </span>
+                      )}
 
-                        <div className="absolute left-4 top-4">
-
-                          <span className="rounded-full bg-orange-600 px-3 py-2 text-xs font-bold text-white shadow-md">
-                            🔥 ÉVACUATION INCENDIE
-                          </span>
-
-                        </div>
-
+                      {chat.evacuation_incendie && (
+                        <span className="rounded-full bg-orange-200 px-3 py-1 text-xs font-semibold text-orange-900">
+                          🔥 Évacuation incendie
+                        </span>
                       )}
 
                     </div>
 
 
-                    {/* CONTENU */}
+                    {/* NOM */}
 
-                    <div className="p-6">
-
-                      {/* STATUT */}
-
-                      <div className="flex flex-wrap gap-2">
-
-                        {chat.statut === "perdu" && !isEvacuation && (
-
-                          <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800">
-                            🔴 Chat perdu
-                          </span>
-
-                        )}
-
-                        {chat.statut === "perdu" && isEvacuation && (
-
-                          <span className="rounded-full bg-orange-200 px-3 py-1 text-xs font-bold text-orange-900">
-                            🔥 Perdu lors d'une évacuation
-                          </span>
-
-                        )}
-
-                        {chat.statut === "trouve" && (
-
-                          <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-                            🟢 Chat trouvé
-                          </span>
-
-                        )}
-
-                        {chat.statut === "retrouve" && (
-
-                          <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
-                            ✅ Chat retrouvé
-                          </span>
-
-                        )}
-
-                      </div>
+                    <h3 className="mt-3 text-xl font-bold text-gray-900">
+                      {chat.name || "Chat sans nom"}
+                    </h3>
 
 
-                      {/* NOM */}
+                    {/* LIEU */}
 
-                      <h3
-                        className={`
-                          mt-3 text-xl font-bold
-                          ${
-                            isEvacuation
-                              ? "text-orange-950"
-                              : "text-gray-900"
-                          }
-                        `}
-                      >
-                        {chat.name || "Chat sans nom"}
-                      </h3>
+                    <p className="mt-2 text-sm text-gray-700">
+                      📍 {chat.location || "Lieu non renseigné"}
+                    </p>
 
 
-                      {/* LIEU */}
+                    {/* LIEN */}
 
-                      <p
-                        className={`
-                          mt-2 text-sm
-                          ${
-                            isEvacuation
-                              ? "text-orange-900"
-                              : "text-gray-600"
-                          }
-                        `}
-                      >
-                        📍 {chat.location || "Lieu non renseigné"}
-                      </p>
+                    <p className="mt-4 font-semibold text-emerald-600">
+                      Voir la fiche →
+                    </p>
 
+                  </div>
 
-                      {/* MESSAGE SPÉCIAL */}
+                </Link>
 
-                      {isEvacuation && (
-
-                        <div className="mt-4 rounded-xl border border-orange-200 bg-orange-100 p-3">
-
-                          <p className="text-sm font-semibold text-orange-900">
-                            🔥 Ce chat a été perdu lors d'une évacuation.
-                          </p>
-
-                          <p className="mt-1 text-xs leading-5 text-orange-800">
-                            Une attention particulière est portée à ce
-                            signalement.
-                          </p>
-
-                        </div>
-
-                      )}
-
-
-                      {/* LIEN */}
-
-                      <p
-                        className={`
-                          mt-5 font-semibold
-                          ${
-                            isEvacuation
-                              ? "text-orange-700"
-                              : "text-emerald-600"
-                          }
-                        `}
-                      >
-                        Voir la fiche →
-                      </p>
-
-                    </div>
-
-                  </Link>
-
-                );
-
-              })}
+              ))}
 
             </div>
 
@@ -526,7 +423,7 @@ export default async function HomePage() {
 
         <div className="mx-auto max-w-6xl">
 
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
             <div>
 
@@ -541,33 +438,21 @@ export default async function HomePage() {
             </div>
 
 
-            <div className="flex flex-wrap gap-5 text-sm font-medium text-emerald-700">
+            <div className="flex flex-wrap gap-4 text-sm font-medium text-emerald-700">
 
-              <Link
-                href="/"
-                className="hover:text-emerald-900"
-              >
+              <Link href="/">
                 Accueil
               </Link>
 
-              <Link
-                href="/chats"
-                className="hover:text-emerald-900"
-              >
+              <Link href="/chats">
                 Chats perdus
               </Link>
 
-              <Link
-                href="/chats-trouves"
-                className="hover:text-emerald-900"
-              >
+              <Link href="/chats-trouves">
                 Chats trouvés
               </Link>
 
-              <Link
-                href="/carte"
-                className="hover:text-emerald-900"
-              >
+              <Link href="/carte">
                 Carte
               </Link>
 
