@@ -1,8 +1,6 @@
-
 "use client";
 
 import { useEffect, useRef } from "react";
-import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 type MapPickerProps = {
@@ -19,12 +17,11 @@ export default function MapPicker({
   longitude,
   onPositionChange,
 }: MapPickerProps) {
-  const mapContainerRef = useRef<HTMLDivElement | null>(
-    null
-  );
+  const mapContainerRef =
+    useRef<HTMLDivElement | null>(null);
 
-  const mapRef = useRef<L.Map | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
+  const mapRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
 
   const onPositionChangeRef =
     useRef(onPositionChange);
@@ -43,9 +40,21 @@ export default function MapPicker({
       return;
     }
 
-    // Icône Leaflet
-    const defaultIcon =
-      L.icon({
+    let map: any;
+
+    async function initializeMap() {
+      // Leaflet est chargé uniquement dans le navigateur
+      const L = await import("leaflet");
+
+      if (!mapContainerRef.current) {
+        return;
+      }
+
+      if (mapRef.current) {
+        return;
+      }
+
+      const defaultIcon = L.icon({
         iconUrl:
           "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
 
@@ -61,107 +70,108 @@ export default function MapPicker({
         shadowSize: [41, 41],
       });
 
-    L.Marker.prototype.options.icon =
-      defaultIcon;
+      L.Marker.prototype.options.icon =
+        defaultIcon;
 
-    // Position initiale :
-    // Bordeaux par défaut
-    const initialLatitude =
-      latitude ?? 44.8378;
+      const initialLatitude =
+        latitude ?? 44.8378;
 
-    const initialLongitude =
-      longitude ?? -0.5792;
+      const initialLongitude =
+        longitude ?? -0.5792;
 
-    const map = L.map(
-      mapContainerRef.current
-    ).setView(
-      [
-        initialLatitude,
-        initialLongitude,
-      ],
-      latitude !== null &&
-      longitude !== null
-        ? 14
-        : 12
-    );
+      map = L.map(
+        mapContainerRef.current
+      ).setView(
+        [
+          initialLatitude,
+          initialLongitude,
+        ],
+        latitude !== null &&
+        longitude !== null
+          ? 14
+          : 12
+      );
 
-    mapRef.current = map;
+      mapRef.current = map;
 
-    // Fond OpenStreetMap
-    L.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19,
-      }
-    ).addTo(map);
+      L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          maxZoom: 19,
+        }
+      ).addTo(map);
 
-    // Marqueur initial
-    if (
-      latitude !== null &&
-      longitude !== null
-    ) {
-      markerRef.current =
-        L.marker(
-          [
+      if (
+        latitude !== null &&
+        longitude !== null
+      ) {
+        markerRef.current =
+          L.marker([
             latitude,
             longitude,
-          ]
-        )
-          .addTo(map)
-          .bindPopup(
-            "📍 Emplacement sélectionné"
-          )
-          .openPopup();
+          ])
+            .addTo(map)
+            .bindPopup(
+              "📍 Emplacement sélectionné"
+            )
+            .openPopup();
+      }
+
+      map.on(
+        "click",
+        (event: any) => {
+          const lat =
+            event.latlng.lat;
+
+          const lng =
+            event.latlng.lng;
+
+          if (markerRef.current) {
+            markerRef.current.setLatLng([
+              lat,
+              lng,
+            ]);
+          } else {
+            markerRef.current =
+              L.marker([
+                lat,
+                lng,
+              ])
+                .addTo(map)
+                .bindPopup(
+                  "📍 Emplacement sélectionné"
+                )
+                .openPopup();
+          }
+
+          onPositionChangeRef.current(
+            lat,
+            lng
+          );
+        }
+      );
+
+      setTimeout(() => {
+        if (map) {
+          map.invalidateSize();
+        }
+      }, 100);
     }
 
-    // Clic sur la carte
-    map.on(
-      "click",
-      (event: L.LeafletMouseEvent) => {
-        const lat =
-          event.latlng.lat;
-
-        const lng =
-          event.latlng.lng;
-
-        if (markerRef.current) {
-          markerRef.current.setLatLng(
-            [lat, lng]
-          );
-        } else {
-          markerRef.current =
-            L.marker([lat, lng])
-              .addTo(map)
-              .bindPopup(
-                "📍 Emplacement sélectionné"
-              )
-              .openPopup();
-        }
-
-        onPositionChangeRef.current(
-          lat,
-          lng
-        );
-      }
-    );
-
-    // Correction du rendu lorsque la carte
-    // apparaît après le chargement du composant
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 100);
+    initializeMap();
 
     return () => {
-      map.remove();
-      mapRef.current = null;
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+
       markerRef.current = null;
     };
   }, []);
 
-  // Lorsque la ville sélectionnée change,
-  // déplacer la carte et le marqueur.
   useEffect(() => {
     const map = mapRef.current;
 
@@ -173,7 +183,7 @@ export default function MapPicker({
       return;
     }
 
-    const position: L.LatLngExpression = [
+    const position = [
       latitude,
       longitude,
     ];
@@ -190,14 +200,6 @@ export default function MapPicker({
       markerRef.current.setLatLng(
         position
       );
-    } else {
-      markerRef.current =
-        L.marker(position)
-          .addTo(map)
-          .bindPopup(
-            "📍 Emplacement sélectionné"
-          )
-          .openPopup();
     }
 
     setTimeout(() => {
@@ -219,4 +221,3 @@ export default function MapPicker({
     </div>
   );
 }
-
