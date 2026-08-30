@@ -2,10 +2,70 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import Link from "next/link";
+
+type AddressResult = {
+  properties: {
+    label: string;
+    postcode?: string;
+    city?: string;
+  };
+  geometry: {
+    coordinates: [number, number];
+  };
+};
 
 export default function SignalerChatTrouve() {
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const [locationSearch, setLocationSearch] = useState("");
+  const [suggestions, setSuggestions] = useState<AddressResult[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState("");
+
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+
+  async function searchLocation(value: string) {
+    setLocationSearch(value);
+    setSelectedLocation("");
+    setLatitude(null);
+    setLongitude(null);
+
+    if (value.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(
+          value
+        )}&limit=5`
+      );
+
+      if (!response.ok) {
+        setSuggestions([]);
+        return;
+      }
+
+      const data = await response.json();
+      setSuggestions(data.features || []);
+    } catch (error) {
+      console.error("Erreur recherche adresse :", error);
+      setSuggestions([]);
+    }
+  }
+
+  function selectLocation(result: AddressResult) {
+    const [lon, lat] = result.geometry.coordinates;
+
+    setLocationSearch(result.properties.label);
+    setSelectedLocation(result.properties.label);
+    setLatitude(lat);
+    setLongitude(lon);
+    setSuggestions([]);
+  }
 
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>
@@ -15,35 +75,53 @@ export default function SignalerChatTrouve() {
     setLoading(true);
     setMessage("");
 
+    if (!selectedLocation || latitude === null || longitude === null) {
+      setMessage(
+        "Merci de sélectionner une ville dans les suggestions."
+      );
+      setLoading(false);
+      return;
+    }
+
     const form = event.currentTarget;
     const formData = new FormData(form);
+
+    // =========================
+    // PHOTO
+    // =========================
 
     const photo = formData.get("photo") as File | null;
 
     let photoUrl: string | null = null;
 
-    // =========================
-    // ENVOI DE LA PHOTO
-    // =========================
-
     if (photo && photo.size > 0) {
-      const fileName = `${Date.now()}-${photo.name}`;
+      const fileExtension =
+        photo.name.split(".").pop() || "jpg";
 
-      const { error: uploadError } = await supabase.storage
-        .from("photos-chats")
-        .upload(fileName, photo);
+      const fileName = `${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2)}.${fileExtension}`;
+
+      const { error: uploadError } =
+        await supabase.storage
+          .from("photos-chats")
+          .upload(fileName, photo);
 
       if (uploadError) {
         console.error("Erreur photo :", uploadError);
 
-        setMessage("Impossible d'envoyer la photo.");
+        setMessage(
+          "Impossible d'envoyer la photo."
+        );
+
         setLoading(false);
         return;
       }
 
-      const { data: publicUrlData } = supabase.storage
-        .from("photos-chats")
-        .getPublicUrl(fileName);
+      const { data: publicUrlData } =
+        supabase.storage
+          .from("photos-chats")
+          .getPublicUrl(fileName);
 
       photoUrl = publicUrlData.publicUrl;
     }
@@ -52,33 +130,47 @@ export default function SignalerChatTrouve() {
     // ENREGISTREMENT
     // =========================
 
-    const { error } = await supabase.from("chats").insert({
-      name: formData.get("name") || "Chat trouvé",
-      color: formData.get("color"),
-      breed: formData.get("breed"),
-      sex: formData.get("sex"),
-      description: formData.get("description"),
-      lost_date: null,
-      location: formData.get("location"),
+    const { error } = await supabase
+      .from("chats")
+      .insert({
+        name:
+          String(formData.get("name") || "") ||
+          "Chat trouvé",
 
-      latitude: formData.get("latitude")
-        ? Number(formData.get("latitude"))
-        : null,
+        color: String(
+          formData.get("color") || ""
+        ),
 
-      longitude: formData.get("longitude")
-        ? Number(formData.get("longitude"))
-        : null,
+        breed:
+          String(formData.get("breed") || "") ||
+          null,
 
-      photo_url: photoUrl,
-      statut: "trouve",
-    });
+        sex:
+          String(formData.get("sex") || "") ||
+          null,
 
-    // =========================
-    // ERREUR
-    // =========================
+        description:
+          String(formData.get("description") || "") ||
+          null,
+
+        lost_date: null,
+
+        location: selectedLocation,
+
+        latitude,
+
+        longitude,
+
+        photo_url: photoUrl,
+
+        statut: "trouve",
+      });
 
     if (error) {
-      console.error("Erreur Supabase complète :", error);
+      console.error(
+        "Erreur Supabase complète :",
+        error
+      );
 
       setMessage(
         `Erreur Supabase : ${
@@ -90,15 +182,18 @@ export default function SignalerChatTrouve() {
       return;
     }
 
-    // =========================
-    // SUCCÈS
-    // =========================
-
     setMessage(
       "🐱 Le chat trouvé a bien été signalé !"
     );
 
     form.reset();
+
+    setLocationSearch("");
+    setSelectedLocation("");
+    setSuggestions([]);
+    setLatitude(null);
+    setLongitude(null);
+
     setLoading(false);
   }
 
@@ -106,45 +201,46 @@ export default function SignalerChatTrouve() {
     <main className="min-h-screen bg-gray-50 px-6 py-16">
       <div className="mx-auto max-w-2xl">
 
-        {/* =========================
-            EN-TÊTE
-        ========================= */}
+        {/* RETOUR */}
 
-        <div className="mb-10">
+        <Link
+          href="/"
+          className="text-sm font-medium text-gray-700 hover:text-black"
+        >
+          ← Retour à l'accueil
+        </Link>
 
+        {/* TITRE */}
+
+        <div className="mt-8 mb-10">
           <p className="text-sm font-semibold uppercase tracking-wide text-gray-700">
             Nouveau signalement
           </p>
 
-          <h1 className="mt-2 text-4xl font-bold text-black">
+          <h1 className="mt-2 text-4xl font-bold text-gray-950">
             🐱 Signaler un chat trouvé
           </h1>
 
-          <p className="mt-4 text-gray-700">
+          <p className="mt-4 text-lg text-gray-700">
             Vous avez trouvé un chat ? Donnez quelques
-            informations pour aider son propriétaire à le
-            retrouver.
+            informations pour aider son propriétaire à
+            le retrouver.
           </p>
-
         </div>
 
-        {/* =========================
-            FORMULAIRE
-        ========================= */}
+        {/* FORMULAIRE */}
 
         <form
           onSubmit={handleSubmit}
           className="space-y-6 rounded-2xl bg-white p-8 shadow-sm"
         >
 
-          {/* =========================
-              NOM
-          ========================= */}
+          {/* NOM */}
 
           <div>
             <label
               htmlFor="name"
-              className="font-medium text-black"
+              className="font-semibold text-gray-950"
             >
               Nom du chat
             </label>
@@ -154,18 +250,16 @@ export default function SignalerChatTrouve() {
               name="name"
               type="text"
               placeholder="Ex : Minou (si vous le connaissez)"
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-black focus:ring-1 focus:ring-black"
+              className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-black focus:ring-1 focus:ring-black"
             />
           </div>
 
-          {/* =========================
-              COULEUR
-          ========================= */}
+          {/* COULEUR */}
 
           <div>
             <label
               htmlFor="color"
-              className="font-medium text-black"
+              className="font-semibold text-gray-950"
             >
               Couleur / robe
             </label>
@@ -176,18 +270,16 @@ export default function SignalerChatTrouve() {
               type="text"
               required
               placeholder="Ex : noir et blanc"
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-black focus:ring-1 focus:ring-black"
+              className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-black focus:ring-1 focus:ring-black"
             />
           </div>
 
-          {/* =========================
-              RACE
-          ========================= */}
+          {/* RACE */}
 
           <div>
             <label
               htmlFor="breed"
-              className="font-medium text-black"
+              className="font-semibold text-gray-950"
             >
               Race
             </label>
@@ -197,18 +289,16 @@ export default function SignalerChatTrouve() {
               name="breed"
               type="text"
               placeholder="Ex : Européen"
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-black focus:ring-1 focus:ring-black"
+              className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-black focus:ring-1 focus:ring-black"
             />
           </div>
 
-          {/* =========================
-              SEXE
-          ========================= */}
+          {/* SEXE */}
 
           <div>
             <label
               htmlFor="sex"
-              className="font-medium text-black"
+              className="font-semibold text-gray-950"
             >
               Sexe
             </label>
@@ -216,34 +306,21 @@ export default function SignalerChatTrouve() {
             <select
               id="sex"
               name="sex"
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black outline-none focus:border-black focus:ring-1 focus:ring-black"
+              className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black outline-none focus:border-black"
             >
-              <option value="">
-                Sélectionner
-              </option>
-
-              <option value="male">
-                Mâle
-              </option>
-
-              <option value="female">
-                Femelle
-              </option>
-
-              <option value="unknown">
-                Je ne sais pas
-              </option>
+              <option value="">Sélectionner</option>
+              <option value="male">Mâle</option>
+              <option value="female">Femelle</option>
+              <option value="unknown">Je ne sais pas</option>
             </select>
           </div>
 
-          {/* =========================
-              DESCRIPTION
-          ========================= */}
+          {/* DESCRIPTION */}
 
           <div>
             <label
               htmlFor="description"
-              className="font-medium text-black"
+              className="font-semibold text-gray-950"
             >
               Description
             </label>
@@ -253,20 +330,18 @@ export default function SignalerChatTrouve() {
               name="description"
               rows={5}
               placeholder="Collier, tatouage, particularités physiques, comportement..."
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-black focus:ring-1 focus:ring-black"
+              className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-black focus:ring-1 focus:ring-black"
             />
           </div>
 
-          {/* =========================
-              LIEU
-          ========================= */}
+          {/* LOCALISATION */}
 
-          <div>
+          <div className="relative">
             <label
               htmlFor="location"
-              className="font-medium text-black"
+              className="font-semibold text-gray-950"
             >
-              Lieu où le chat a été trouvé
+              📍 Où le chat a-t-il été trouvé ?
             </label>
 
             <input
@@ -274,63 +349,63 @@ export default function SignalerChatTrouve() {
               name="location"
               type="text"
               required
-              placeholder="Ex : Bordeaux, quartier Saint-Michel"
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-black focus:ring-1 focus:ring-black"
+              value={locationSearch}
+              onChange={(event) =>
+                searchLocation(event.target.value)
+              }
+              placeholder="Tapez une ville ou un code postal"
+              autoComplete="off"
+              className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-black focus:ring-1 focus:ring-black"
             />
+
+            {/* SUGGESTIONS */}
+
+            {suggestions.length > 0 && (
+              <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-gray-300 bg-white shadow-lg">
+
+                {suggestions.map((result, index) => (
+                  <button
+                    key={`${result.properties.label}-${index}`}
+                    type="button"
+                    onClick={() =>
+                      selectLocation(result)
+                    }
+                    className="block w-full border-b border-gray-100 px-4 py-3 text-left text-black hover:bg-gray-100"
+                  >
+                    <span className="block font-semibold">
+                      {result.properties.city ||
+                        result.properties.label}
+                    </span>
+
+                    <span className="text-sm text-gray-700">
+                      {result.properties.postcode || ""}
+                      {" · "}
+                      {result.properties.label}
+                    </span>
+                  </button>
+                ))}
+
+              </div>
+            )}
+
+            <p className="mt-2 text-sm text-gray-700">
+              Commencez à taper puis sélectionnez la bonne
+              ville dans la liste.
+            </p>
+
+            {selectedLocation && (
+              <p className="mt-2 font-medium text-emerald-700">
+                ✓ Localisation sélectionnée
+              </p>
+            )}
           </div>
 
-          {/* =========================
-              COORDONNÉES
-          ========================= */}
-
-          <div className="grid gap-4 sm:grid-cols-2">
-
-            <div>
-              <label
-                htmlFor="latitude"
-                className="font-medium text-black"
-              >
-                Latitude
-              </label>
-
-              <input
-                id="latitude"
-                name="latitude"
-                type="number"
-                step="any"
-                placeholder="Ex : 44.8378"
-                className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-black focus:ring-1 focus:ring-black"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="longitude"
-                className="font-medium text-black"
-              >
-                Longitude
-              </label>
-
-              <input
-                id="longitude"
-                name="longitude"
-                type="number"
-                step="any"
-                placeholder="Ex : -0.5792"
-                className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-black focus:ring-1 focus:ring-black"
-              />
-            </div>
-
-          </div>
-
-          {/* =========================
-              PHOTO
-          ========================= */}
+          {/* PHOTO */}
 
           <div>
             <label
               htmlFor="photo"
-              className="font-medium text-black"
+              className="font-semibold text-gray-950"
             >
               Photo du chat
             </label>
@@ -340,35 +415,31 @@ export default function SignalerChatTrouve() {
               name="photo"
               type="file"
               accept="image/*"
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black"
+              className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black"
             />
 
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-gray-700">
               Une photo peut aider le propriétaire à
               reconnaître son chat.
             </p>
           </div>
 
-          {/* =========================
-              BOUTON
-          ========================= */}
+          {/* BOUTON */}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-black px-6 py-4 font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-xl bg-black px-6 py-4 font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading
               ? "Publication en cours..."
               : "🐱 Publier le signalement"}
           </button>
 
-          {/* =========================
-              MESSAGE
-          ========================= */}
+          {/* MESSAGE */}
 
           {message && (
-            <div className="rounded-xl bg-green-50 p-4 text-sm font-medium text-green-800">
+            <div className="rounded-xl bg-green-50 p-4 font-semibold text-gray-950">
               {message}
             </div>
           )}

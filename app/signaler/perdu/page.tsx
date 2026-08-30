@@ -4,9 +4,68 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
+type AddressResult = {
+  properties: {
+    label: string;
+    postcode?: string;
+    city?: string;
+  };
+  geometry: {
+    coordinates: [number, number];
+  };
+};
+
 export default function SignalerChatPerdu() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  const [locationSearch, setLocationSearch] = useState("");
+  const [suggestions, setSuggestions] = useState<AddressResult[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState("");
+
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+
+  async function searchLocation(value: string) {
+    setLocationSearch(value);
+    setSelectedLocation("");
+    setLatitude(null);
+    setLongitude(null);
+
+    if (value.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(
+          value
+        )}&limit=5`
+      );
+
+      if (!response.ok) {
+        setSuggestions([]);
+        return;
+      }
+
+      const data = await response.json();
+      setSuggestions(data.features || []);
+    } catch (error) {
+      console.error("Erreur recherche adresse :", error);
+      setSuggestions([]);
+    }
+  }
+
+  function selectLocation(result: AddressResult) {
+    const [lon, lat] = result.geometry.coordinates;
+
+    setLocationSearch(result.properties.label);
+    setSelectedLocation(result.properties.label);
+    setLatitude(lat);
+    setLongitude(lon);
+    setSuggestions([]);
+  }
 
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>
@@ -15,6 +74,14 @@ export default function SignalerChatPerdu() {
 
     setLoading(true);
     setMessage("");
+
+    if (!selectedLocation || latitude === null || longitude === null) {
+      setMessage(
+        "Merci de sélectionner une ville dans les suggestions."
+      );
+      setLoading(false);
+      return;
+    }
 
     const form = event.currentTarget;
     const formData = new FormData(form);
@@ -29,27 +96,12 @@ export default function SignalerChatPerdu() {
     const lostDate = String(
       formData.get("lost_date") || ""
     );
-    const location = String(
-      formData.get("location") || ""
-    );
     const description = String(
       formData.get("description") || ""
     );
 
-    const latitudeValue = String(
-      formData.get("latitude") || ""
-    );
-
-    const longitudeValue = String(
-      formData.get("longitude") || ""
-    );
-
     const evacuationIncendie =
       formData.get("evacuation_incendie") === "true";
-
-    // =========================
-    // VÉRIFICATIONS
-    // =========================
 
     if (!lostDate) {
       setMessage(
@@ -111,18 +163,6 @@ export default function SignalerChatPerdu() {
     }
 
     // =========================
-    // COORDONNÉES
-    // =========================
-
-    const latitude = latitudeValue
-      ? Number(latitudeValue)
-      : null;
-
-    const longitude = longitudeValue
-      ? Number(longitudeValue)
-      : null;
-
-    // =========================
     // ENREGISTREMENT
     // =========================
 
@@ -135,7 +175,7 @@ export default function SignalerChatPerdu() {
         sex: sex || null,
         contact_email: contactEmail,
         lost_date: lostDate,
-        location,
+        location: selectedLocation,
         description: description || null,
         latitude,
         longitude,
@@ -144,15 +184,8 @@ export default function SignalerChatPerdu() {
         evacuation_incendie: evacuationIncendie,
       });
 
-    // =========================
-    // ERREUR
-    // =========================
-
     if (error) {
-      console.error(
-        "Erreur Supabase :",
-        error
-      );
+      console.error("Erreur Supabase :", error);
 
       setMessage(
         "Erreur : le signalement n'a pas pu être enregistré."
@@ -162,21 +195,26 @@ export default function SignalerChatPerdu() {
       return;
     }
 
-    // =========================
-    // SUCCÈS
-    // =========================
-
     setMessage(
       "🐱 Votre signalement a bien été enregistré !"
     );
 
     form.reset();
+
+    setLocationSearch("");
+    setSelectedLocation("");
+    setSuggestions([]);
+    setLatitude(null);
+    setLongitude(null);
+
     setLoading(false);
   }
 
   return (
     <main className="min-h-screen bg-emerald-50 px-6 py-16">
       <div className="mx-auto max-w-2xl">
+
+        {/* RETOUR */}
 
         <Link
           href="/"
@@ -185,20 +223,24 @@ export default function SignalerChatPerdu() {
           ← Retour à l'accueil
         </Link>
 
-        <div className="mb-10 mt-8">
+        {/* TITRE */}
+
+        <div className="mt-8 mb-10">
           <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
             Nouveau signalement
           </p>
 
-          <h1 className="mt-2 text-4xl font-bold text-black">
+          <h1 className="mt-2 text-4xl font-bold text-gray-950">
             🐱 Signaler un chat perdu
           </h1>
 
-          <p className="mt-4 text-gray-700">
+          <p className="mt-4 text-lg text-gray-700">
             Aidez-nous à retrouver votre compagnon
             en partageant quelques informations.
           </p>
         </div>
+
+        {/* FORMULAIRE */}
 
         <form
           onSubmit={handleSubmit}
@@ -210,7 +252,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="name"
-              className="font-medium text-black"
+              className="font-semibold text-gray-950"
             >
               Nom du chat
             </label>
@@ -221,7 +263,7 @@ export default function SignalerChatPerdu() {
               type="text"
               required
               placeholder="Ex : Minou"
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
             />
           </div>
 
@@ -230,7 +272,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="color"
-              className="font-medium text-black"
+              className="font-semibold text-gray-950"
             >
               Couleur / robe
             </label>
@@ -241,7 +283,7 @@ export default function SignalerChatPerdu() {
               type="text"
               required
               placeholder="Ex : noir et blanc"
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
             />
           </div>
 
@@ -250,7 +292,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="breed"
-              className="font-medium text-black"
+              className="font-semibold text-gray-950"
             >
               Race
             </label>
@@ -260,7 +302,7 @@ export default function SignalerChatPerdu() {
               name="breed"
               type="text"
               placeholder="Ex : Européen"
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
             />
           </div>
 
@@ -269,7 +311,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="sex"
-              className="font-medium text-black"
+              className="font-semibold text-gray-950"
             >
               Sexe
             </label>
@@ -277,7 +319,7 @@ export default function SignalerChatPerdu() {
             <select
               id="sex"
               name="sex"
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black outline-none focus:border-emerald-600"
             >
               <option value="">Sélectionner</option>
               <option value="male">Mâle</option>
@@ -291,7 +333,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="contact_email"
-              className="font-medium text-black"
+              className="font-semibold text-gray-950"
             >
               Votre adresse e-mail
             </label>
@@ -302,10 +344,10 @@ export default function SignalerChatPerdu() {
               type="email"
               required
               placeholder="vous@exemple.fr"
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
             />
 
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-gray-700">
               Cette adresse restera privée et permettra
               aux personnes ayant une information sur votre
               chat de vous contacter.
@@ -317,7 +359,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="lost_date"
-              className="font-medium text-black"
+              className="font-semibold text-gray-950"
             >
               Date de disparition
             </label>
@@ -327,18 +369,18 @@ export default function SignalerChatPerdu() {
               name="lost_date"
               type="date"
               required
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black outline-none focus:border-emerald-600"
             />
           </div>
 
-          {/* LIEU */}
+          {/* LOCALISATION */}
 
-          <div>
+          <div className="relative">
             <label
               htmlFor="location"
-              className="font-medium text-black"
+              className="font-semibold text-gray-950"
             >
-              Lieu de disparition
+              📍 Où le chat a-t-il été perdu ?
             </label>
 
             <input
@@ -346,9 +388,55 @@ export default function SignalerChatPerdu() {
               name="location"
               type="text"
               required
-              placeholder="Ex : Bordeaux, quartier Saint-Michel"
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              value={locationSearch}
+              onChange={(event) =>
+                searchLocation(event.target.value)
+              }
+              placeholder="Tapez une ville ou un code postal"
+              autoComplete="off"
+              className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
             />
+
+            {/* SUGGESTIONS */}
+
+            {suggestions.length > 0 && (
+              <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-gray-300 bg-white shadow-lg">
+
+                {suggestions.map((result, index) => (
+                  <button
+                    key={`${result.properties.label}-${index}`}
+                    type="button"
+                    onClick={() =>
+                      selectLocation(result)
+                    }
+                    className="block w-full border-b border-gray-100 px-4 py-3 text-left text-black hover:bg-emerald-50"
+                  >
+                    <span className="block font-semibold">
+                      {result.properties.city ||
+                        result.properties.label}
+                    </span>
+
+                    <span className="text-sm text-gray-700">
+                      {result.properties.postcode || ""}
+                      {" · "}
+                      {result.properties.label}
+                    </span>
+                  </button>
+                ))}
+
+              </div>
+            )}
+
+            <p className="mt-2 text-sm text-gray-700">
+              Commencez à taper puis sélectionnez la bonne
+              ville dans la liste.
+            </p>
+
+            {selectedLocation && (
+              <p className="mt-2 font-medium text-emerald-700">
+                ✓ Localisation sélectionnée
+              </p>
+            )}
           </div>
 
           {/* DESCRIPTION */}
@@ -356,7 +444,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="description"
-              className="font-medium text-black"
+              className="font-semibold text-gray-950"
             >
               Description
             </label>
@@ -366,67 +454,24 @@ export default function SignalerChatPerdu() {
               name="description"
               rows={5}
               placeholder="Collier, tatouage, particularités physiques, comportement..."
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
             />
-          </div>
-
-          {/* COORDONNÉES */}
-
-          <div className="grid gap-4 sm:grid-cols-2">
-
-            <div>
-              <label
-                htmlFor="latitude"
-                className="font-medium text-black"
-              >
-                Latitude
-              </label>
-
-              <input
-                id="latitude"
-                name="latitude"
-                type="number"
-                step="any"
-                placeholder="Ex : 44.8378"
-                className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="longitude"
-                className="font-medium text-black"
-              >
-                Longitude
-              </label>
-
-              <input
-                id="longitude"
-                name="longitude"
-                type="number"
-                step="any"
-                placeholder="Ex : -0.5792"
-                className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black placeholder:text-gray-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-              />
-            </div>
-
           </div>
 
           {/* INCENDIES */}
 
-          <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-5">
-
+          <div className="rounded-xl border border-orange-200 bg-orange-50 p-5">
             <label className="flex cursor-pointer items-start gap-3">
 
               <input
                 type="checkbox"
                 name="evacuation_incendie"
                 value="true"
-                className="mt-1 h-5 w-5 rounded border-gray-300 text-emerald-700"
+                className="mt-1 h-5 w-5"
               />
 
               <span>
-                <span className="block font-semibold text-black">
+                <span className="block font-semibold text-gray-950">
                   🔥 Ce chat a été perdu suite à une évacuation liée aux incendies
                 </span>
 
@@ -444,7 +489,7 @@ export default function SignalerChatPerdu() {
           <div>
             <label
               htmlFor="photo"
-              className="font-medium text-black"
+              className="font-semibold text-gray-950"
             >
               Photo du chat
             </label>
@@ -454,10 +499,10 @@ export default function SignalerChatPerdu() {
               name="photo"
               type="file"
               accept="image/*"
-              className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-black"
+              className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black"
             />
 
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-gray-700">
               Une photo peut aider à reconnaître votre chat.
             </p>
           </div>
@@ -477,7 +522,7 @@ export default function SignalerChatPerdu() {
           {/* MESSAGE */}
 
           {message && (
-            <div className="rounded-xl bg-emerald-50 p-4 text-sm font-medium text-emerald-800">
+            <div className="rounded-xl bg-emerald-50 p-4 text-sm font-semibold text-gray-950">
               {message}
             </div>
           )}
