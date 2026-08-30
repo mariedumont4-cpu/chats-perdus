@@ -4,10 +4,10 @@ import { supabase } from "@/lib/supabase";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const { data: chats, error } = await supabase
+  const { data: chats } = await supabase
     .from("chats")
     .select(
-      "id, name, photo_url, location, statut, evacuation_incendie, created_at"
+      "id, name, photo_url, location, statut, evacuation_incendie"
     )
     .order("created_at", { ascending: false })
     .limit(6);
@@ -15,133 +15,79 @@ export default async function HomePage() {
   const recentChats = chats ?? [];
 
   return (
-    <main className="min-h-screen bg-[#f6fbf8] text-gray-900">
+    <main className="min-h-screen bg-emerald-50">
 
       {/* =====================================================
           HERO
-      ====================================================== */}
+      ===================================================== */}
 
-      <section className="relative overflow-hidden">
+      <section className="px-6 py-12 sm:py-16">
+        <div className="mx-auto max-w-6xl">
 
-        {/* Décor */}
-        <div className="absolute -left-32 -top-32 h-72 w-72 rounded-full bg-emerald-100 opacity-60 blur-3xl" />
-        <div className="absolute -right-32 top-20 h-96 w-96 rounded-full bg-green-100 opacity-60 blur-3xl" />
+          <div className="overflow-hidden rounded-3xl bg-white shadow-sm">
 
-        <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-10 lg:pb-28 lg:pt-16">
+            <div className="grid items-center lg:grid-cols-2">
 
-          {/* Petite navigation */}
-          <div className="mb-10 flex items-center justify-between">
+              {/* TEXTE */}
 
-            <Link
-              href="/"
-              className="text-xl font-extrabold tracking-tight text-emerald-900"
-            >
-              🐾 Chats Perdus
-            </Link>
+              <div className="p-8 sm:p-12 lg:p-16">
 
-            <Link
-              href="/carte"
-              className="rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-800 shadow-sm transition hover:bg-emerald-50"
-            >
-              🗺️ Voir la carte
-            </Link>
-
-          </div>
-
-          <div className="grid items-center gap-14 lg:grid-cols-2">
-
-            {/* TEXTE */}
-
-            <div>
-
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-800 shadow-sm">
-                <span>🐾</span>
-                <span>Une communauté qui aide les chats</span>
-              </div>
-
-              <h1 className="mt-7 max-w-3xl text-5xl font-extrabold leading-[1.05] tracking-tight text-emerald-950 sm:text-6xl">
-                Aidons les chats à
-                <span className="mt-2 block text-emerald-600">
-                  retrouver leur maison.
-                </span>
-              </h1>
-
-              <p className="mt-7 max-w-xl text-lg leading-8 text-gray-600">
-                Vous avez perdu votre chat ? Vous en avez trouvé un ?
-                Signalez-le simplement pour permettre à la communauté
-                d'agir rapidement.
-              </p>
-
-              {/* BOUTONS */}
-
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-
-                <Link
-                  href="/signaler/perdu"
-                  className="group rounded-2xl bg-emerald-600 px-6 py-4 text-center font-bold text-white shadow-lg shadow-emerald-600/20 transition hover:-translate-y-0.5 hover:bg-emerald-700"
-                >
-                  🐱 Signaler un chat perdu
-                  <span className="ml-2 transition group-hover:translate-x-1">
-                    →
-                  </span>
-                </Link>
-
-                <Link
-                  href="/signaler/trouve"
-                  className="rounded-2xl border border-emerald-200 bg-white px-6 py-4 text-center font-bold text-emerald-800 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50"
-                >
-                  🟢 J'ai trouvé un chat
-                </Link>
-
-              </div>
-
-              {/* MINI INFOS */}
-
-              <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-gray-500">
-
-                <div className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-                    ✓
-                  </span>
-                  Signalement simple
+                <div className="inline-flex rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-800">
+                  🐾 Une communauté qui aide les chats
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-                    ✓
+                <h1 className="mt-6 text-4xl font-bold tracking-tight text-emerald-950 sm:text-5xl lg:text-6xl">
+                  Aidons les chats perdus à
+                  <span className="mt-2 block text-emerald-600">
+                    retrouver leur maison.
                   </span>
-                  Carte des signalements
+                </h1>
+
+                <p className="mt-6 max-w-xl text-lg leading-8 text-gray-600">
+                  Signalez un chat perdu ou trouvé et partagez sa
+                  localisation pour aider les propriétaires à retrouver
+                  leur compagnon.
+                </p>
+
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+
+                  <Link
+                    href="/signaler/perdu"
+                    className="rounded-xl bg-emerald-600 px-6 py-4 text-center font-semibold text-white transition hover:bg-emerald-700"
+                  >
+                    🐱 Signaler un chat perdu
+                  </Link>
+
+                  <Link
+                    href="/signaler/trouve"
+                    className="rounded-xl border border-emerald-200 bg-emerald-50 px-6 py-4 text-center font-semibold text-emerald-800 transition hover:bg-emerald-100"
+                  >
+                    🟢 Signaler un chat trouvé
+                  </Link>
+
                 </div>
 
               </div>
 
-            </div>
+              {/* ILLUSTRATION */}
 
-            {/* VISUEL */}
+              <div className="flex min-h-[360px] items-center justify-center bg-emerald-100 p-10">
 
-            <div className="relative flex justify-center">
+                <div className="text-center">
 
-              <div className="relative flex h-[330px] w-[330px] items-center justify-center rounded-[40%] bg-emerald-100 shadow-inner sm:h-[390px] sm:w-[390px]">
-
-                <div className="absolute inset-6 rounded-[38%] border border-emerald-200" />
-
-                <div className="relative text-center">
-
-                  <div className="text-9xl drop-shadow-sm">
-                    🐱
+                  <div className="mx-auto flex h-56 w-56 items-center justify-center rounded-full bg-white shadow-sm">
+                    <span className="text-8xl">
+                      🐱
+                    </span>
                   </div>
 
-                  <div className="mt-5 rounded-2xl bg-white px-6 py-4 shadow-lg">
+                  <p className="mt-6 text-lg font-bold text-emerald-900">
+                    Chaque signalement compte
+                  </p>
 
-                    <p className="font-bold text-emerald-900">
-                      Chaque signalement compte
-                    </p>
-
-                    <p className="mt-1 text-sm text-gray-500">
-                      Ensemble, retrouvons-les.
-                    </p>
-
-                  </div>
+                  <p className="mt-2 text-sm text-emerald-800">
+                    Ensemble, aidons-les à rentrer chez eux.
+                  </p>
 
                 </div>
 
@@ -152,157 +98,163 @@ export default async function HomePage() {
           </div>
 
         </div>
-
       </section>
+
 
       {/* =====================================================
           ACTIONS
-      ====================================================== */}
+      ===================================================== */}
 
-      <section className="px-6 pb-20">
+      <section className="px-6 pb-16">
+        <div className="mx-auto max-w-6xl">
 
-        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 text-center">
 
-          <div className="mb-10 max-w-2xl">
-
-            <p className="text-sm font-bold uppercase tracking-widest text-emerald-600">
+            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-600">
               Comment aider ?
             </p>
 
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-emerald-950 sm:text-4xl">
-              Quelques clics peuvent faire la différence.
+            <h2 className="mt-2 text-3xl font-bold text-emerald-950">
+              Quelques clics peuvent faire la différence
             </h2>
 
           </div>
 
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-3">
 
-            {/* PERDUS */}
+            {/* CHATS PERDUS */}
 
             <Link
               href="/chats"
-              className="group rounded-3xl border border-red-100 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group rounded-2xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
             >
 
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-3xl">
                 🔴
               </div>
 
-              <h3 className="mt-6 text-xl font-bold text-gray-900">
+              <h3 className="mt-5 text-xl font-bold text-gray-900">
                 Chats perdus
               </h3>
 
-              <p className="mt-3 leading-7 text-gray-600">
-                Consultez les chats actuellement recherchés
-                et ouvrez leur fiche pour obtenir davantage
-                d'informations.
+              <p className="mt-3 text-gray-600">
+                Consultez les chats actuellement recherchés.
               </p>
 
-              <div className="mt-6 font-bold text-red-600 transition group-hover:translate-x-1">
+              <p className="mt-5 font-semibold text-emerald-600 transition group-hover:text-emerald-700">
                 Voir les chats perdus →
-              </div>
+              </p>
 
             </Link>
 
-            {/* TROUVÉS */}
+
+            {/* CHATS TROUVÉS */}
 
             <Link
               href="/chats-trouves"
-              className="group rounded-3xl border border-emerald-100 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group rounded-2xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
             >
 
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-3xl">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-3xl">
                 🟢
               </div>
 
-              <h3 className="mt-6 text-xl font-bold text-gray-900">
+              <h3 className="mt-5 text-xl font-bold text-gray-900">
                 Chats trouvés
               </h3>
 
-              <p className="mt-3 leading-7 text-gray-600">
-                Vous avez trouvé un chat ? Consultez les
-                signalements et aidez-le à retrouver son
-                propriétaire.
+              <p className="mt-3 text-gray-600">
+                Consultez les chats trouvés et aidez leur propriétaire.
               </p>
 
-              <div className="mt-6 font-bold text-emerald-600 transition group-hover:translate-x-1">
+              <p className="mt-5 font-semibold text-emerald-600 transition group-hover:text-emerald-700">
                 Voir les chats trouvés →
-              </div>
+              </p>
 
             </Link>
+
 
             {/* CARTE */}
 
             <Link
               href="/carte"
-              className="group rounded-3xl border border-sky-100 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group rounded-2xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
             >
 
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-50 text-3xl">
                 🗺️
               </div>
 
-              <h3 className="mt-6 text-xl font-bold text-gray-900">
+              <h3 className="mt-5 text-xl font-bold text-gray-900">
                 Carte
               </h3>
 
-              <p className="mt-3 leading-7 text-gray-600">
-                Visualisez les signalements autour de vous
-                et repérez rapidement les zones concernées.
+              <p className="mt-3 text-gray-600">
+                Visualisez les signalements autour de vous.
               </p>
 
-              <div className="mt-6 font-bold text-sky-600 transition group-hover:translate-x-1">
+              <p className="mt-5 font-semibold text-emerald-600 transition group-hover:text-emerald-700">
                 Voir la carte →
-              </div>
+              </p>
 
             </Link>
 
           </div>
 
         </div>
-
       </section>
 
+
       {/* =====================================================
-          INCENDIES
-      ====================================================== */}
+          ALERTE INCENDIES
+      ===================================================== */}
 
-      <section className="px-6 pb-20">
+      <section className="px-6 pb-16">
 
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-6xl">
 
-          <div className="overflow-hidden rounded-3xl border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50">
+          <div className="overflow-hidden rounded-3xl border border-orange-300 bg-gradient-to-r from-orange-100 to-red-50 shadow-sm">
 
-            <div className="flex flex-col gap-8 p-8 sm:p-10 lg:flex-row lg:items-center lg:p-12">
+            <div className="p-8 sm:p-10">
 
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-3xl">
-                🔥
+              <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
+
+                {/* ICÔNE */}
+
+                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl bg-orange-200 text-4xl shadow-sm">
+                  🔥
+                </div>
+
+                {/* TEXTE */}
+
+                <div className="flex-1">
+
+                  <div className="inline-flex rounded-full bg-orange-200 px-3 py-1 text-xs font-bold uppercase tracking-wide text-orange-900">
+                    Situation particulière
+                  </div>
+
+                  <h2 className="mt-3 text-2xl font-bold text-orange-950 sm:text-3xl">
+                    Chats perdus lors d'une évacuation
+                  </h2>
+
+                  <p className="mt-3 max-w-3xl leading-7 text-orange-900">
+                    Les évacuations liées aux incendies peuvent entraîner
+                    la disparition de nombreux animaux. Signalez rapidement
+                    votre chat afin de faciliter les recherches.
+                  </p>
+
+                </div>
+
+                {/* BOUTON */}
+
+                <Link
+                  href="/signaler/perdu"
+                  className="shrink-0 rounded-xl bg-orange-600 px-6 py-4 text-center font-bold text-white shadow-sm transition hover:bg-orange-700"
+                >
+                  🔥 Signaler un chat
+                </Link>
+
               </div>
-
-              <div className="flex-1">
-
-                <p className="text-sm font-bold uppercase tracking-widest text-orange-600">
-                  Alerte importante
-                </p>
-
-                <h2 className="mt-2 text-2xl font-extrabold text-orange-950 sm:text-3xl">
-                  Chats perdus lors d'une évacuation
-                </h2>
-
-                <p className="mt-3 max-w-2xl leading-7 text-orange-900/80">
-                  Les évacuations peuvent entraîner la disparition
-                  de nombreux animaux. Signalez rapidement votre chat
-                  afin d'augmenter les chances de le retrouver.
-                </p>
-
-              </div>
-
-              <Link
-                href="/signaler/perdu"
-                className="shrink-0 rounded-2xl bg-orange-600 px-6 py-4 text-center font-bold text-white shadow-md transition hover:bg-orange-700"
-              >
-                🔥 Signaler mon chat
-              </Link>
 
             </div>
 
@@ -312,82 +264,56 @@ export default async function HomePage() {
 
       </section>
 
+
       {/* =====================================================
           DERNIERS SIGNALEMENTS
-      ====================================================== */}
+      ===================================================== */}
 
-      <section className="px-6 pb-24">
+      <section className="px-6 pb-20">
 
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-6xl">
 
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
 
             <div>
 
-              <p className="text-sm font-bold uppercase tracking-widest text-emerald-600">
-                En ce moment
+              <p className="text-sm font-semibold uppercase tracking-wide text-emerald-600">
+                Derniers signalements
               </p>
 
-              <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-emerald-950 sm:text-4xl">
-                Les derniers signalements
+              <h2 className="mt-2 text-3xl font-bold text-emerald-950">
+                Les derniers chats signalés
               </h2>
-
-              <p className="mt-3 text-gray-600">
-                Les six signalements les plus récents.
-              </p>
 
             </div>
 
             <Link
               href="/chats"
-              className="font-bold text-emerald-700 transition hover:text-emerald-900"
+              className="font-semibold text-emerald-700 hover:text-emerald-900"
             >
               Voir tous les chats →
             </Link>
 
           </div>
 
-          {/* ERREUR */}
 
-          {error ? (
+          {/* AUCUN SIGNALEMENT */}
 
-            <div className="mt-8 rounded-3xl border border-red-200 bg-red-50 p-6">
+          {recentChats.length === 0 ? (
 
-              <p className="font-bold text-red-800">
-                Impossible de récupérer les signalements.
-              </p>
-
-              <p className="mt-2 text-sm text-red-700">
-                {error.message}
-              </p>
-
-            </div>
-
-          ) : recentChats.length === 0 ? (
-
-            /* AUCUN SIGNAL */
-
-            <div className="mt-8 rounded-3xl border border-emerald-100 bg-white p-12 text-center shadow-sm">
+            <div className="mt-8 rounded-2xl bg-white p-10 text-center shadow-sm">
 
               <div className="text-6xl">
                 🐱
               </div>
 
-              <h3 className="mt-5 text-xl font-bold text-gray-900">
-                Aucun signalement pour le moment
-              </h3>
-
-              <p className="mx-auto mt-2 max-w-md text-gray-600">
-                Soyez le premier à signaler un chat et aidez
-                sa famille à le retrouver.
+              <p className="mt-5 font-semibold text-gray-900">
+                Aucun signalement pour le moment.
               </p>
 
-              <Link
-                href="/signaler/perdu"
-                className="mt-6 inline-flex rounded-xl bg-emerald-600 px-5 py-3 font-bold text-white transition hover:bg-emerald-700"
-              >
-                🐱 Signaler un chat
-              </Link>
+              <p className="mt-2 text-gray-600">
+                Soyez le premier à aider un chat.
+              </p>
 
             </div>
 
@@ -397,99 +323,191 @@ export default async function HomePage() {
 
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
-              {recentChats.map((chat) => (
+              {recentChats.map((chat) => {
 
-                <Link
-                  key={chat.id}
-                  href={`/chats/${chat.id}`}
-                  className="group overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
-                >
+                const isEvacuation =
+                  chat.statut === "perdu" &&
+                  chat.evacuation_incendie === true;
 
-                  {/* PHOTO */}
+                return (
 
-                  <div className="relative overflow-hidden">
+                  <Link
+                    key={chat.id}
+                    href={`/chats/${chat.id}`}
+                    className={`
+                      group overflow-hidden rounded-2xl shadow-sm transition
+                      hover:-translate-y-1 hover:shadow-lg
+                      ${
+                        isEvacuation
+                          ? "border-2 border-orange-400 bg-orange-50"
+                          : "bg-white"
+                      }
+                    `}
+                  >
 
-                    {chat.photo_url ? (
+                    {/* PHOTO */}
 
-                      <img
-                        src={chat.photo_url}
-                        alt={`Photo de ${chat.name || "chat"}`}
-                        className="h-60 w-full object-cover transition duration-500 group-hover:scale-105"
-                      />
+                    <div className="relative">
 
-                    ) : (
+                      {chat.photo_url ? (
 
-                      <div className="flex h-60 w-full items-center justify-center bg-emerald-50 text-8xl">
-                        🐱
+                        <img
+                          src={chat.photo_url}
+                          alt={`Photo de ${chat.name || "chat"}`}
+                          className="h-52 w-full object-cover"
+                        />
+
+                      ) : (
+
+                        <div
+                          className={`
+                            flex h-52 w-full items-center justify-center text-7xl
+                            ${
+                              isEvacuation
+                                ? "bg-orange-100"
+                                : "bg-emerald-50"
+                            }
+                          `}
+                        >
+                          🐱
+                        </div>
+
+                      )}
+
+                      {/* BADGE INCENDIE */}
+
+                      {isEvacuation && (
+
+                        <div className="absolute left-4 top-4">
+
+                          <span className="rounded-full bg-orange-600 px-3 py-2 text-xs font-bold text-white shadow-md">
+                            🔥 ÉVACUATION INCENDIE
+                          </span>
+
+                        </div>
+
+                      )}
+
+                    </div>
+
+
+                    {/* CONTENU */}
+
+                    <div className="p-6">
+
+                      {/* STATUT */}
+
+                      <div className="flex flex-wrap gap-2">
+
+                        {chat.statut === "perdu" && !isEvacuation && (
+
+                          <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800">
+                            🔴 Chat perdu
+                          </span>
+
+                        )}
+
+                        {chat.statut === "perdu" && isEvacuation && (
+
+                          <span className="rounded-full bg-orange-200 px-3 py-1 text-xs font-bold text-orange-900">
+                            🔥 Perdu lors d'une évacuation
+                          </span>
+
+                        )}
+
+                        {chat.statut === "trouve" && (
+
+                          <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                            🟢 Chat trouvé
+                          </span>
+
+                        )}
+
+                        {chat.statut === "retrouve" && (
+
+                          <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
+                            ✅ Chat retrouvé
+                          </span>
+
+                        )}
+
                       </div>
 
-                    )}
 
-                    {/* BADGE */}
+                      {/* NOM */}
 
-                    <div className="absolute left-4 top-4">
+                      <h3
+                        className={`
+                          mt-3 text-xl font-bold
+                          ${
+                            isEvacuation
+                              ? "text-orange-950"
+                              : "text-gray-900"
+                          }
+                        `}
+                      >
+                        {chat.name || "Chat sans nom"}
+                      </h3>
 
-                      {chat.statut === "perdu" && (
-                        <span className="rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-red-700 shadow-sm backdrop-blur">
-                          🔴 Perdu
-                        </span>
+
+                      {/* LIEU */}
+
+                      <p
+                        className={`
+                          mt-2 text-sm
+                          ${
+                            isEvacuation
+                              ? "text-orange-900"
+                              : "text-gray-600"
+                          }
+                        `}
+                      >
+                        📍 {chat.location || "Lieu non renseigné"}
+                      </p>
+
+
+                      {/* MESSAGE SPÉCIAL */}
+
+                      {isEvacuation && (
+
+                        <div className="mt-4 rounded-xl border border-orange-200 bg-orange-100 p-3">
+
+                          <p className="text-sm font-semibold text-orange-900">
+                            🔥 Ce chat a été perdu lors d'une évacuation.
+                          </p>
+
+                          <p className="mt-1 text-xs leading-5 text-orange-800">
+                            Une attention particulière est portée à ce
+                            signalement.
+                          </p>
+
+                        </div>
+
                       )}
 
-                      {chat.statut === "trouve" && (
-                        <span className="rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-emerald-700 shadow-sm backdrop-blur">
-                          🟢 Trouvé
-                        </span>
-                      )}
 
-                      {chat.statut === "retrouve" && (
-                        <span className="rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-blue-700 shadow-sm backdrop-blur">
-                          ✅ Retrouvé
-                        </span>
-                      )}
+                      {/* LIEN */}
+
+                      <p
+                        className={`
+                          mt-5 font-semibold
+                          ${
+                            isEvacuation
+                              ? "text-orange-700"
+                              : "text-emerald-600"
+                          }
+                        `}
+                      >
+                        Voir la fiche →
+                      </p>
 
                     </div>
 
-                  </div>
+                  </Link>
 
-                  {/* CONTENU */}
+                );
 
-                  <div className="p-6">
-
-                    <div className="flex flex-wrap gap-2">
-
-                      {chat.evacuation_incendie && (
-                        <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-bold text-orange-800">
-                          🔥 Évacuation
-                        </span>
-                      )}
-
-                    </div>
-
-                    <h3 className="mt-3 text-2xl font-extrabold text-gray-900">
-                      {chat.name || "Chat sans nom"}
-                    </h3>
-
-                    <p className="mt-3 text-sm text-gray-600">
-                      📍 {chat.location || "Lieu non renseigné"}
-                    </p>
-
-                    <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4">
-
-                      <span className="text-sm font-semibold text-gray-500">
-                        Voir le signalement
-                      </span>
-
-                      <span className="font-bold text-emerald-600 transition group-hover:translate-x-1">
-                        →
-                      </span>
-
-                    </div>
-
-                  </div>
-
-                </Link>
-
-              ))}
+              })}
 
             </div>
 
@@ -499,68 +517,62 @@ export default async function HomePage() {
 
       </section>
 
+
       {/* =====================================================
           FOOTER
-      ====================================================== */}
+      ===================================================== */}
 
-      <footer className="border-t border-emerald-100 bg-white">
+      <footer className="border-t border-emerald-100 bg-white px-6 py-10">
 
-        <div className="mx-auto max-w-7xl px-6 py-12">
+        <div className="mx-auto max-w-6xl">
 
-          <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
 
             <div>
 
-              <Link
-                href="/"
-                className="text-xl font-extrabold text-emerald-900"
-              >
+              <p className="font-bold text-emerald-800">
                 🐱 Chats Perdus
-              </Link>
+              </p>
 
-              <p className="mt-2 max-w-sm text-sm leading-6 text-gray-500">
-                Une communauté pour aider les chats perdus
-                et trouvés à retrouver leur famille.
+              <p className="mt-1 text-sm text-gray-500">
+                Une communauté pour aider les chats à retrouver leur maison.
               </p>
 
             </div>
 
-            <nav className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-emerald-700">
+
+            <div className="flex flex-wrap gap-5 text-sm font-medium text-emerald-700">
 
               <Link
                 href="/"
-                className="transition hover:text-emerald-950"
+                className="hover:text-emerald-900"
               >
                 Accueil
               </Link>
 
               <Link
                 href="/chats"
-                className="transition hover:text-emerald-950"
+                className="hover:text-emerald-900"
               >
                 Chats perdus
               </Link>
 
               <Link
                 href="/chats-trouves"
-                className="transition hover:text-emerald-950"
+                className="hover:text-emerald-900"
               >
                 Chats trouvés
               </Link>
 
               <Link
                 href="/carte"
-                className="transition hover:text-emerald-950"
+                className="hover:text-emerald-900"
               >
                 Carte
               </Link>
 
-            </nav>
+            </div>
 
-          </div>
-
-          <div className="mt-10 border-t border-gray-100 pt-6 text-center text-xs text-gray-400">
-            © {new Date().getFullYear()} Chats Perdus
           </div>
 
         </div>
