@@ -60,11 +60,12 @@ export default function SignalerChatTrouve() {
     setSearchingCity(true);
 
     try {
-      const response = await fetch(
-        `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(
-          value.trim()
-        )}&fields=nom,codesPostaux,centre&limit=8`
-      );
+      const url =
+        "https://geo.api.gouv.fr/communes?nom=" +
+        encodeURIComponent(value.trim()) +
+        "&fields=nom,codesPostaux,centre&limit=8";
+
+      const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error("Erreur API villes");
@@ -122,6 +123,12 @@ export default function SignalerChatTrouve() {
       formData.get("description") || ""
     );
 
+    const identifie =
+      formData.get("identifie") === "true";
+
+    const sterilise =
+      formData.get("sterilise") === "true";
+
     if (!color) {
       setMessage("Merci d'indiquer la couleur du chat.");
       setLoading(false);
@@ -144,17 +151,30 @@ export default function SignalerChatTrouve() {
       ? `${city} (${postalCode})`
       : city;
 
-    const photo = formData.get("photo") as File | null;
+    const photos = formData.getAll("photos") as File[];
 
-    let photoUrl: string | null = null;
+    const selectedPhotos = photos.filter(
+      (photo) =>
+        photo instanceof File &&
+        photo.size > 0
+    );
 
-    if (photo && photo.size > 0) {
+    if (selectedPhotos.length > 3) {
+      setMessage("Vous pouvez sélectionner 3 photos maximum.");
+      setLoading(false);
+      return;
+    }
+
+    const photoUrls: string[] = [];
+
+    for (const photo of selectedPhotos) {
       const extension =
         photo.name.split(".").pop() || "jpg";
 
-      const fileName = `${Date.now()}-${Math.random()
-        .toString(36)
-        .substring(2)}.${extension}`;
+      const fileName =
+        `${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2)}.${extension}`;
 
       const { error: uploadError } =
         await supabase.storage
@@ -162,17 +182,25 @@ export default function SignalerChatTrouve() {
           .upload(fileName, photo);
 
       if (uploadError) {
-        console.error("Erreur upload photo :", uploadError);
-        setMessage("Impossible d'envoyer la photo.");
+        console.error(
+          "Erreur upload photo :",
+          uploadError
+        );
+
+        setMessage(
+          "Impossible d'envoyer une des photos."
+        );
+
         setLoading(false);
         return;
       }
 
-      const { data } = supabase.storage
-        .from("photos-chats")
-        .getPublicUrl(fileName);
+      const { data } =
+        supabase.storage
+          .from("photos-chats")
+          .getPublicUrl(fileName);
 
-      photoUrl = data.publicUrl;
+      photoUrls.push(data.publicUrl);
     }
 
     const { error } = await supabase
@@ -187,8 +215,12 @@ export default function SignalerChatTrouve() {
         location,
         latitude,
         longitude,
-        photo_url: photoUrl,
+        photo_url: photoUrls[0] || null,
+        photo_url_2: photoUrls[1] || null,
+        photo_url_3: photoUrls[2] || null,
         statut: "trouve",
+        identifie,
+        sterilise,
       });
 
     if (error) {
@@ -344,6 +376,42 @@ export default function SignalerChatTrouve() {
             </select>
           </div>
 
+          <div className="rounded-xl border border-gray-300 bg-gray-50 p-5">
+            <p className="mb-4 font-bold text-black">
+              Informations complémentaires
+            </p>
+
+            <div className="space-y-4">
+
+              <label className="flex cursor-pointer items-center gap-3">
+                <input
+                  type="checkbox"
+                  name="identifie"
+                  value="true"
+                  className="h-5 w-5"
+                />
+
+                <span className="font-semibold text-black">
+                  ☑️ Chat identifié
+                </span>
+              </label>
+
+              <label className="flex cursor-pointer items-center gap-3">
+                <input
+                  type="checkbox"
+                  name="sterilise"
+                  value="true"
+                  className="h-5 w-5"
+                />
+
+                <span className="font-semibold text-black">
+                  ☑️ Chat stérilisé
+                </span>
+              </label>
+
+            </div>
+          </div>
+
           <div>
             <label
               htmlFor="description"
@@ -450,23 +518,33 @@ export default function SignalerChatTrouve() {
 
           <div>
             <label
-              htmlFor="photo"
+              htmlFor="photos"
               className="font-bold text-black"
             >
-              Photo du chat
+              Photos du chat
             </label>
 
             <input
-              id="photo"
-              name="photo"
+              id="photos"
+              name="photos"
               type="file"
               accept="image/*"
+              multiple
               className="mt-2 w-full rounded-lg border border-gray-400 bg-white p-3 text-black"
+              onChange={(event) => {
+                const files = event.target.files;
+
+                if (files && files.length > 3) {
+                  event.target.value = "";
+                  setMessage(
+                    "Vous pouvez sélectionner 3 photos maximum."
+                  );
+                }
+              }}
             />
 
             <p className="mt-2 text-sm text-black">
-              Une photo peut aider le propriétaire à
-              reconnaître son chat.
+              Vous pouvez ajouter jusqu'à 3 photos.
             </p>
           </div>
 
