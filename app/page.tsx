@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
-  const { data: chats } = await supabase
+  const { data: chats, error } = await supabase
     .from("chats")
     .select(
-      "id, name, photo_url, location, statut, evacuation_incendie"
+      "id, name, photo_url, location, statut, evacuation_incendie, created_at"
     )
     .order("created_at", { ascending: false })
     .limit(6);
@@ -15,7 +17,10 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen bg-emerald-50">
 
-      {/* HERO */}
+      {/* =========================
+          HERO
+      ========================= */}
+
       <section className="px-6 py-16">
         <div className="mx-auto max-w-6xl">
 
@@ -24,6 +29,7 @@ export default async function HomePage() {
             <div className="grid items-center gap-12 lg:grid-cols-2">
 
               <div>
+
                 <div className="inline-flex rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-800">
                   🐾 Une communauté qui aide les chats
                 </div>
@@ -35,7 +41,7 @@ export default async function HomePage() {
                   </span>
                 </h1>
 
-                <p className="mt-6 text-lg leading-8 text-gray-600">
+                <p className="mt-6 text-lg leading-8 text-gray-700">
                   Signalez un chat perdu ou trouvé et partagez sa
                   localisation pour aider les propriétaires à retrouver
                   leur compagnon.
@@ -58,29 +64,45 @@ export default async function HomePage() {
                   </Link>
 
                 </div>
+
               </div>
 
               <div className="flex justify-center">
+
                 <div className="flex h-72 w-72 items-center justify-center rounded-full bg-emerald-100">
+
                   <div className="text-center">
-                    <div className="text-8xl">🐱</div>
+
+                    <div className="text-8xl">
+                      🐱
+                    </div>
+
                     <p className="mt-4 font-semibold text-emerald-800">
                       Chaque signalement compte
                     </p>
+
                   </div>
+
                 </div>
+
               </div>
 
             </div>
+
           </div>
+
         </div>
       </section>
 
-      {/* ACTIONS */}
+      {/* =========================
+          ACTIONS
+      ========================= */}
+
       <section className="px-6 pb-16">
         <div className="mx-auto max-w-6xl">
 
           <div className="mb-8 text-center">
+
             <p className="text-sm font-semibold uppercase tracking-wide text-emerald-600">
               Comment aider ?
             </p>
@@ -88,6 +110,7 @@ export default async function HomePage() {
             <h2 className="mt-2 text-3xl font-bold text-emerald-950">
               Quelques clics peuvent faire la différence
             </h2>
+
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
@@ -96,6 +119,7 @@ export default async function HomePage() {
               href="/chats"
               className="rounded-2xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
+
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-3xl">
                 🔴
               </div>
@@ -104,19 +128,21 @@ export default async function HomePage() {
                 Chats perdus
               </h3>
 
-              <p className="mt-3 text-gray-600">
+              <p className="mt-3 text-gray-700">
                 Consultez les chats actuellement recherchés.
               </p>
 
               <p className="mt-5 font-semibold text-emerald-600">
                 Voir les chats perdus →
               </p>
+
             </Link>
 
             <Link
               href="/chats-trouves"
               className="rounded-2xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
+
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-3xl">
                 🟢
               </div>
@@ -125,19 +151,21 @@ export default async function HomePage() {
                 Chats trouvés
               </h3>
 
-              <p className="mt-3 text-gray-600">
+              <p className="mt-3 text-gray-700">
                 Consultez les chats trouvés et aidez leur propriétaire.
               </p>
 
               <p className="mt-5 font-semibold text-emerald-600">
                 Voir les chats trouvés →
               </p>
+
             </Link>
 
             <Link
               href="/carte"
               className="rounded-2xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
+
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-50 text-3xl">
                 🗺️
               </div>
@@ -146,21 +174,27 @@ export default async function HomePage() {
                 Carte
               </h3>
 
-              <p className="mt-3 text-gray-600">
+              <p className="mt-3 text-gray-700">
                 Visualisez les signalements autour de vous.
               </p>
 
               <p className="mt-5 font-semibold text-emerald-600">
                 Voir la carte →
               </p>
+
             </Link>
 
           </div>
+
         </div>
       </section>
 
-      {/* INCENDIES */}
+      {/* =========================
+          INCENDIES
+      ========================= */}
+
       <section className="px-6 pb-16">
+
         <div className="mx-auto max-w-6xl">
 
           <div className="rounded-2xl border border-orange-200 bg-orange-50 p-8">
@@ -177,7 +211,7 @@ export default async function HomePage() {
                   Chats perdus lors d'une évacuation
                 </h2>
 
-                <p className="mt-2 text-orange-900/70">
+                <p className="mt-2 text-orange-900">
                   Les évacuations peuvent entraîner la disparition
                   de nombreux animaux. Signalez rapidement votre chat
                   pour aider les recherches.
@@ -193,17 +227,25 @@ export default async function HomePage() {
               </Link>
 
             </div>
+
           </div>
+
         </div>
+
       </section>
 
-      {/* DERNIERS SIGNALEMENTS */}
+      {/* =========================
+          DERNIERS SIGNALEMENTS
+      ========================= */}
+
       <section className="px-6 pb-20">
+
         <div className="mx-auto max-w-6xl">
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
 
             <div>
+
               <p className="text-sm font-semibold uppercase tracking-wide text-emerald-600">
                 Derniers signalements
               </p>
@@ -211,6 +253,7 @@ export default async function HomePage() {
               <h2 className="mt-2 text-3xl font-bold text-emerald-950">
                 Les derniers chats signalés
               </h2>
+
             </div>
 
             <Link
@@ -222,17 +265,37 @@ export default async function HomePage() {
 
           </div>
 
-          {recentChats.length === 0 ? (
+          {/* =========================
+              ERREUR SUPABASE
+          ========================= */}
+
+          {error ? (
+
+            <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-6">
+
+              <p className="font-semibold text-red-800">
+                Impossible de récupérer les signalements.
+              </p>
+
+              <p className="mt-2 text-sm text-red-700">
+                {error.message}
+              </p>
+
+            </div>
+
+          ) : recentChats.length === 0 ? (
 
             <div className="mt-8 rounded-2xl bg-white p-8 text-center shadow-sm">
 
-              <div className="text-5xl">🐱</div>
+              <div className="text-5xl">
+                🐱
+              </div>
 
               <p className="mt-4 font-medium text-gray-900">
                 Aucun signalement pour le moment.
               </p>
 
-              <p className="mt-2 text-gray-600">
+              <p className="mt-2 text-gray-700">
                 Soyez le premier à aider un chat.
               </p>
 
@@ -250,6 +313,8 @@ export default async function HomePage() {
                   className="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
                 >
 
+                  {/* PHOTO */}
+
                   {chat.photo_url ? (
 
                     <img
@@ -265,6 +330,8 @@ export default async function HomePage() {
                     </div>
 
                   )}
+
+                  {/* INFORMATIONS */}
 
                   <div className="p-6">
 
@@ -300,7 +367,7 @@ export default async function HomePage() {
                       {chat.name || "Chat sans nom"}
                     </h3>
 
-                    <p className="mt-2 text-sm text-gray-600">
+                    <p className="mt-2 text-sm text-gray-700">
                       📍 {chat.location || "Lieu non renseigné"}
                     </p>
 
@@ -319,9 +386,13 @@ export default async function HomePage() {
           )}
 
         </div>
+
       </section>
 
-      {/* FOOTER */}
+      {/* =========================
+          FOOTER
+      ========================= */}
+
       <footer className="border-t border-emerald-100 bg-white px-6 py-10">
 
         <div className="mx-auto max-w-6xl">
@@ -329,13 +400,15 @@ export default async function HomePage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
             <div>
+
               <p className="font-bold text-emerald-800">
                 🐱 Chats Perdus
               </p>
 
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-600">
                 Une communauté pour aider les chats à retrouver leur maison.
               </p>
+
             </div>
 
             <div className="flex flex-wrap gap-4 text-sm font-medium text-emerald-700">
